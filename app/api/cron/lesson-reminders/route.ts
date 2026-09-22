@@ -3,9 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-
-// Bu route Vercel Cron tarafından her 5-10 dakikada bir çağrılır (vercel.json'a bakınız).
-// Güvenlik: Authorization header'ı CRON_SECRET ile karşılaştırılır.
+import type { LessonWithProfileRow } from "@/lib/supabase/query-types";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -29,7 +27,8 @@ export async function GET(request: Request) {
     .eq("status", "scheduled")
     .eq("reminder_24h_sent", false)
     .gte("starts_at", in24hStart.toISOString())
-    .lte("starts_at", in24hEnd.toISOString());
+    .lte("starts_at", in24hEnd.toISOString())
+    .returns<LessonWithProfileRow[]>();
 
   for (const lesson of lessons24h || []) {
     await sendReminder(lesson, "24 saat", resend, supabase);
@@ -47,7 +46,8 @@ export async function GET(request: Request) {
     .eq("status", "scheduled")
     .eq("reminder_1h_sent", false)
     .gte("starts_at", in1hStart.toISOString())
-    .lte("starts_at", in1hEnd.toISOString());
+    .lte("starts_at", in1hEnd.toISOString())
+    .returns<LessonWithProfileRow[]>();
 
   for (const lesson of lessons1h || []) {
     await sendReminder(lesson, "1 saat", resend, supabase);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, Clock, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import type { LessonRow, SubmissionWithAssignmentRow } from "@/lib/supabase/query-types";
 
 export default async function StudentDashboard() {
   const supabase = createClient();
@@ -17,14 +18,16 @@ export default async function StudentDashboard() {
     .eq("status", "scheduled")
     .gte("starts_at", new Date().toISOString())
     .order("starts_at", { ascending: true })
-    .limit(3);
+    .limit(3)
+    .returns<LessonRow[]>();
 
   const { data: pendingAssignments } = await supabase
     .from("submissions")
     .select("*, assignments(title, due_at)")
     .eq("student_id", user!.id)
     .in("status", ["pending"])
-    .limit(5);
+    .limit(5)
+    .returns<SubmissionWithAssignmentRow[]>();
 
   const nextLesson = upcomingLessons?.[0];
 

@@ -1,10 +1,11 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import GoogleAuthButton from "@/components/marketing/GoogleAuthButton";
+import type { ProfileRoleRow } from "@/lib/supabase/query-types";
 
 export default function LoginPage() {
   return (
@@ -15,7 +16,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +42,7 @@ function LoginForm() {
       .from("profiles")
       .select("role")
       .eq("id", data.user.id)
-      .single();
+      .single<ProfileRoleRow>();
 
     if (profileError || !profile) {
       setError("Profil bilgisi alınamadı, tekrar dene.");
@@ -53,8 +53,15 @@ function LoginForm() {
     const redirect = searchParams.get("redirect");
     const defaultPath = profile.role === "admin" ? "/admin/dashboard" : "/student/dashboard";
 
-    router.refresh();
-    router.push(redirect || defaultPath);
+    // Not: Burada router.push yerine bilinçli olarak tam sayfa yenilemesi (window.location)
+    // kullanıyoruz. Sebep: signInWithPassword döndüğü anda tarayıcıya session cookie'si
+    // yazılması küçük bir gecikmeyle (bir sonraki event-loop turunda) tamamlanabiliyor.
+    // router.push ile yapılan client-side geçiş, middleware'e bu cookie henüz yazılmadan
+    // giden bir istek gönderebiliyor ve bu da middleware'in eski/boş rolü görüp yanlış
+    // panele yönlendirmesine (ya da "biraz bekleyince düzelmesine") sebep oluyordu.
+    // window.location.href tam bir tarayıcı navigasyonu başlattığı için cookie kesinlikle
+    // yazıldıktan sonra yeni bir istek atar, middleware her zaman güncel rolü görür.
+    window.location.href = redirect || defaultPath;
   }
 
   return (

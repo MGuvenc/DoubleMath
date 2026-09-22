@@ -40,30 +40,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Giriş yapılmışsa auth sayfalarından uzaklaştır
-  if (user && isAuthRoute) {
+  // Rol bilgisi bu istekte lazımsa (auth sayfaları, admin ya da student rotası),
+  // tek seferde çekip aşağıdaki tüm kontrollerde kullanıyoruz.
+  if (user && (isAuthRoute || isAdminRoute || isStudentRoute)) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single<ProfileRoleRow>();
 
-    const url = request.nextUrl.clone();
-    url.pathname = profile?.role === "admin" ? "/admin/dashboard" : "/student/dashboard";
-    return NextResponse.redirect(url);
-  }
+    const homeForRole = profile?.role === "admin" ? "/admin/dashboard" : "/student/dashboard";
 
-  // Admin rotasına öğrenci girmeye çalışırsa engelle
-  if (user && isAdminRoute) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single<ProfileRoleRow>();
+    // Giriş yapılmışsa auth sayfalarından uzaklaştır
+    if (isAuthRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = homeForRole;
+      return NextResponse.redirect(url);
+    }
 
-    if (profile?.role !== "admin") {
+    // Admin rotasına öğrenci girmeye çalışırsa engelle
+    if (isAdminRoute && profile?.role !== "admin") {
       const url = request.nextUrl.clone();
       url.pathname = "/student/dashboard";
+      return NextResponse.redirect(url);
+    }
+
+    // Öğrenci rotasına admin girmeye çalışırsa engelle
+    if (isStudentRoute && profile?.role === "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/dashboard";
       return NextResponse.redirect(url);
     }
   }
