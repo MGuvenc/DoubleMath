@@ -30,17 +30,31 @@ function LoginForm() {
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
+    if (error || !data.user) {
       setError("E-posta veya şifre hatalı.");
       setLoading(false);
       return;
     }
 
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      setError("Profil bilgisi alınamadı, tekrar dene.");
+      setLoading(false);
+      return;
+    }
+
     const redirect = searchParams.get("redirect");
-    router.push(redirect || "/student/dashboard");
+    const defaultPath = profile.role === "admin" ? "/admin/dashboard" : "/student/dashboard";
+
     router.refresh();
+    router.push(redirect || defaultPath);
   }
 
   return (
