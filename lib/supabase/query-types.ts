@@ -64,3 +64,14 @@ export interface SubmissionWithAssignmentRow {
     due_at: string;
   } | null;
 }
+
+export interface StudentOption {
+  id: string;
+  full_name: string;
+  email: string;
+  grade_level: string | null;
+}
+
+export interface LessonWithStudentRow extends LessonRow {
+  profiles: { full_name: string; email: string } | null;
+}
