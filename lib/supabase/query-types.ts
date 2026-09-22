@@ -1,3 +1,9 @@
+// database.types.ts henüz gerçek `supabase gen types` çıktısıyla değiştirilmemişse (Database = any)
+// ya da değiştirildiğinde bir sürüm/tip uyuşmazlığı olursa, zincirlenmiş
+// .select().eq().single() sorguları TypeScript tarafından yanlışlıkla `never` olarak
+// çıkarılabiliyor. Bunu önlemek için ilgili sorgularda kullanılacak minimal, elle yazılmış
+// tipler burada tutulur — .single<ProfileRoleRow>() gibi kullanılır.
+
 export interface ProfileRoleRow {
   role: "admin" | "student";
   full_name: string;

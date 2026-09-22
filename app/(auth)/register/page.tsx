@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import GoogleAuthButton from "@/components/marketing/GoogleAuthButton";
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -61,7 +70,17 @@ export default function RegisterPage() {
         <h1 className="text-xl font-bold text-slate-900">Kayıt Ol</h1>
         <p className="mt-1 text-sm text-slate-600">Öğrenci hesabı oluştur.</p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="mt-6">
+          <GoogleAuthButton />
+        </div>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs text-slate-400">veya e-posta ile</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label">Ad Soyad</label>
             <input
