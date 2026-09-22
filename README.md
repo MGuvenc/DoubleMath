@@ -15,7 +15,9 @@ npm install
 
 1. [supabase.com](https://supabase.com) üzerinden yeni proje oluştur.
 https://sxubzeptdsasxmssgsiu.supabase.co
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4dWJ6ZXB0ZHNhc3htc3Nnc2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzE3NzAsImV4cCI6MjEwNTYwNzc3MH0.tlwSosO61Ncjp5hTOXVHHdMu2woBSSIyYyjIjizG1oA
 sb\_publishable\_RzVjC4b7mCAkkBPkI8HwBg\_RAobU2eK
+sb\_secret\_-suyKeg3Vfit7NiO6exSUA\_t5bAzS9v
 postgresql://postgres:\[YOUR-PASSWORD]@db.sxubzeptdsasxmssgsiu.supabase.co:5432/postgres
 supabase login
 supabase init
