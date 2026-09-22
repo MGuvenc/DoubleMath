@@ -46,6 +46,7 @@ export async function createLesson(formData: FormData): Promise<LessonActionResu
 
   revalidatePath("/admin/lessons");
   revalidatePath("/student/dashboard");
+  revalidatePath("/student/lessons");
   return { success: true };
 }
 
@@ -69,27 +70,30 @@ export async function updateLesson(lessonId: string, formData: FormData): Promis
     return { error: "Bitiş saati başlangıç saatinden sonra olmalıdır." };
   }
 
-  const { error } = await supabase
-    .from("lessons")
-    .update({
-      starts_at: startsAt,
-      ends_at: endsAt,
-      topic,
-      meeting_url: meetingUrl,
-      reminder_24h_sent: false,
-      reminder_1h_sent: false,
-    })
-    .eq("id", lessonId);
+    const { error } = await supabase
+        .from("lessons")
+        .update({
+        starts_at: startsAt,
+        ends_at: endsAt,
+        topic,
+        meeting_url: meetingUrl,
+        status: "scheduled",
+        reschedule_reason: null,
+        reminder_24h_sent: false,
+        reminder_1h_sent: false,
+        })
+        .eq("id", lessonId);
 
-  if (error) {
-    console.error("Ders güncellenemedi:", error);
-    return { error: "Ders güncellenemedi." };
-  }
+    if (error) {
+        console.error("Ders güncellenemedi:", error);
+        return { error: "Ders güncellenemedi." };
+    }
 
-  revalidatePath("/admin/lessons");
-  revalidatePath("/student/dashboard");
-  return { success: true };
-}
+    revalidatePath("/admin/lessons");
+    revalidatePath("/student/dashboard");
+    revalidatePath("/student/lessons");
+    return { success: true };
+    }
 
 export async function cancelLesson(lessonId: string): Promise<LessonActionResult> {
   const supabase = createClient();
@@ -106,6 +110,7 @@ export async function cancelLesson(lessonId: string): Promise<LessonActionResult
 
   revalidatePath("/admin/lessons");
   revalidatePath("/student/dashboard");
+  revalidatePath("/student/lessons");
   return { success: true };
 }
 
@@ -123,5 +128,25 @@ export async function markLessonCompleted(lessonId: string, teacherNotes: string
   }
 
   revalidatePath("/admin/lessons");
+  return { success: true };
+}
+
+export async function dismissRescheduleRequest(lessonId: string): Promise<LessonActionResult> {
+  const supabase = createClient();
+
+  // Erteleme talebini reddet: ders orijinal saatinde kalır, sadece durumu ve
+  // sebep metni temizlenir.
+  const { error } = await supabase
+    .from("lessons")
+    .update({ status: "scheduled", reschedule_reason: null })
+    .eq("id", lessonId);
+
+  if (error) {
+    console.error("Erteleme talebi reddedilemedi:", error);
+    return { error: "İşlem başarısız oldu." };
+  }
+
+  revalidatePath("/admin/lessons");
+  revalidatePath("/student/lessons");
   return { success: true };
 }

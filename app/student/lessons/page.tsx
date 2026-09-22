@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { Video } from "lucide-react";
+import UpcomingLessonCard from "@/components/student/UpcomingLessonCard";
 import type { LessonRow } from "@/lib/supabase/query-types";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   scheduled: { label: "Planlandı", className: "bg-blue-50 text-blue-700" },
   completed: { label: "Tamamlandı", className: "bg-green-50 text-green-700" },
   cancelled: { label: "İptal Edildi", className: "bg-red-50 text-red-700" },
-  reschedule_requested: { label: "Erteleme Talebi", className: "bg-amber-50 text-amber-700" },
+  reschedule_requested: { label: "Erteleme Talebi Gönderildi", className: "bg-amber-50 text-amber-700" },
 };
 
 export default async function StudentLessonsPage() {
@@ -44,27 +44,9 @@ export default async function StudentLessonsPage() {
           {upcoming.length === 0 && (
             <div className="card text-sm text-slate-400">Planlanmış bir dersin yok.</div>
           )}
-          {upcoming.map((lesson) => {
-            const statusInfo = STATUS_LABELS[lesson.status];
-            return (
-              <div key={lesson.id} className="card flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    {format(new Date(lesson.starts_at), "d MMMM EEEE, HH:mm", { locale: tr })}
-                  </p>
-                  {lesson.topic && <p className="text-sm text-slate-600">Konu: {lesson.topic}</p>}
-                  <span className={`mt-2 inline-block rounded-full px-2 py-1 text-xs font-medium ${statusInfo.className}`}>
-                    {statusInfo.label}
-                  </span>
-                </div>
-                {lesson.meeting_url && (
-                  <a href={lesson.meeting_url} target="_blank" className="btn-primary inline-flex items-center gap-2">
-                    <Video className="h-4 w-4" /> Derse Katıl
-                  </a>
-                )}
-              </div>
-            );
-          })}
+          {upcoming.map((lesson) => (
+            <UpcomingLessonCard key={lesson.id} lesson={lesson} />
+          ))}
         </div>
       </section>
 
