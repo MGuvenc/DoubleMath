@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { ProfileRoleRow } from "@/lib/supabase/query-types";
+import type { ProfileRoleRow } from "./lib/supabase/query-types";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
