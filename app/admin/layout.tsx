@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import type { ProfileRoleRow } from "@/lib/supabase/query-types";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .from("profiles")
     .select("role, full_name")
     .eq("id", user.id)
-    .single();
+    .single<ProfileRoleRow>();
 
   if (profile?.role !== "admin") redirect("/student/dashboard");
 

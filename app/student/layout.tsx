@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import StudentSidebar from "@/components/student/StudentSidebar";
+import type { ProfileFullRow } from "@/lib/supabase/query-types";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .single<ProfileFullRow>();
 
   return (
     <div className="flex min-h-screen bg-slate-50">

@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     .select("seo_title, seo_description")
     .eq("slug", "home")
     .eq("status", "published")
-    .single();
+    .single<{ seo_title: string | null; seo_description: string | null }>();
 
   return {
     title: page?.seo_title || undefined,
@@ -47,7 +47,7 @@ export default async function HomePage() {
     .select("content_json")
     .eq("slug", "home")
     .eq("status", "published")
-    .single();
+    .single<{ content_json: any }>();
 
   const content = (page?.content_json as any) || {};
   const hero = content.hero || {

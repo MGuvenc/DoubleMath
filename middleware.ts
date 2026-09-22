@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { ProfileRoleRow } from "@/lib/supabase/query-types";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -45,7 +46,7 @@ export async function middleware(request: NextRequest) {
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .single<ProfileRoleRow>();
 
     const url = request.nextUrl.clone();
     url.pathname = profile?.role === "admin" ? "/admin/dashboard" : "/student/dashboard";
@@ -58,7 +59,7 @@ export async function middleware(request: NextRequest) {
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .single<ProfileRoleRow>();
 
     if (profile?.role !== "admin") {
       const url = request.nextUrl.clone();
