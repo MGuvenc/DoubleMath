@@ -56,7 +56,7 @@ export default function SubmissionCard({ submission }: { submission: StudentSubm
 
       {assignment.description && <p className="mt-2 text-sm text-slate-600">{assignment.description}</p>}
       {assignment.attachment_url && (
-        
+        <a
           href={assignment.attachment_url}
           target="_blank"
           className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600"

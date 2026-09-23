@@ -48,7 +48,7 @@ export default async function StudentMaterialsPage() {
                 const Icon = TYPE_ICONS[m.type];
                 const href = m.type === "pdf" ? m.file_path : m.external_url;
                 return (
-                  
+                  <a
                     key={m.id}
                     href={href || "#"}
                     target="_blank"

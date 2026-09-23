@@ -168,7 +168,7 @@ export default function AssignmentsManager({
                 <div className="mt-4 border-t border-slate-100 pt-4">
                   {a.description && <p className="mb-3 text-sm text-slate-600">{a.description}</p>}
                   {a.attachment_url && (
-                    
+                    <a
                       href={a.attachment_url}
                       target="_blank"
                       className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600"
