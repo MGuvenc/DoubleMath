@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Plus, Pencil, XCircle, ExternalLink } from "lucide-react";
-import { createLesson, updateLesson, cancelLesson } from "@/app/admin/lessons/actions";
+import { createLesson, updateLesson, cancelLesson, dismissRescheduleRequest } from "@/app/admin/lessons/actions";
 import type { LessonWithStudentRow, StudentOption } from "@/lib/supabase/query-types";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
@@ -73,6 +73,13 @@ export default function LessonsManager({
     if (!confirm("Bu dersi iptal etmek istediğine emin misin?")) return;
     startTransition(async () => {
       await cancelLesson(lessonId);
+      router.refresh();
+    });
+  }
+
+  function handleDismissRequest(lessonId: string) {
+    startTransition(async () => {
+      await dismissRescheduleRequest(lessonId);
       router.refresh();
     });
   }
@@ -233,6 +240,14 @@ export default function LessonsManager({
                     {format(new Date(lesson.ends_at), "HH:mm")}
                   </td>
                   <td className="py-3 pr-4 text-slate-600">{lesson.topic || "—"}</td>
+                                    <td className="py-3 pr-4 text-slate-600">
+                    {lesson.topic || "—"}
+                    {lesson.status === "reschedule_requested" && lesson.reschedule_reason && (
+                      <p className="mt-1 text-xs italic text-amber-600">
+                        Sebep: {lesson.reschedule_reason}
+                      </p>
+                    )}
+                  </td>
                   <td className="py-3 pr-4">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusInfo.className}`}>
                       {statusInfo.label}
@@ -245,9 +260,18 @@ export default function LessonsManager({
                           <ExternalLink className="h-4 w-4 text-slate-400 hover:text-brand-600" />
                         </a>
                       )}
-                      {lesson.status === "scheduled" && (
+                      {lesson.status === "reschedule_requested" && (
+                        <button
+                          onClick={() => handleDismissRequest(lesson.id)}
+                          className="text-xs font-medium text-slate-500 hover:text-brand-600"
+                          title="Talebi reddet, dersi orijinal saatinde tut"
+                        >
+                          Talebi Reddet
+                        </button>
+                      )}
+                      {(lesson.status === "scheduled" || lesson.status === "reschedule_requested") && (
                         <>
-                          <button onClick={() => openEditForm(lesson)} title="Düzenle">
+                          <button onClick={() => openEditForm(lesson)} title="Düzenle / Yeni Saate Al">
                             <Pencil className="h-4 w-4 text-slate-400 hover:text-brand-600" />
                           </button>
                           <button onClick={() => handleCancel(lesson.id)} title="İptal Et">
