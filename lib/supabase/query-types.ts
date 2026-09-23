@@ -75,3 +75,51 @@ export interface StudentOption {
 export interface LessonWithStudentRow extends LessonRow {
   profiles: { full_name: string; email: string } | null;
 }
+
+export interface AssignmentRow {
+  id: string;
+  title: string;
+  description: string | null;
+  attachment_url: string | null;
+  due_at: string;
+  created_at: string;
+}
+
+export interface SubmissionForAdminRow {
+  id: string;
+  student_id: string;
+  file_url: string | null;
+  note: string | null;
+  status: "pending" | "submitted" | "late" | "graded";
+  grade: number | null;
+  feedback: string | null;
+  submitted_at: string | null;
+  profiles: { full_name: string; email: string } | null;
+}
+
+export interface AssignmentWithSubmissionsRow extends AssignmentRow {
+  submissions: SubmissionForAdminRow[];
+}
+
+export interface StudentSubmissionRow {
+  id: string;
+  assignment_id: string;
+  file_url: string | null;
+  note: string | null;
+  status: "pending" | "submitted" | "late" | "graded";
+  grade: number | null;
+  feedback: string | null;
+  submitted_at: string | null;
+  assignments: AssignmentRow | null;
+}
+
+export interface MaterialRow {
+  id: string;
+  title: string;
+  description: string | null;
+  type: "pdf" | "video" | "link";
+  file_path: string | null;
+  external_url: string | null;
+  topic: string | null;
+  created_at: string;
+}

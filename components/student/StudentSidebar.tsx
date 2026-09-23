@@ -9,6 +9,7 @@ import {
   TrendingUp,
   MessageCircle,
   ClipboardList,
+  BookOpen,
   Bell,
   LogOut,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const LINKS = [
   { href: "/student/lessons", label: "Derslerim", icon: Calendar },
   { href: "/student/progress", label: "İlerlemem", icon: TrendingUp },
   { href: "/student/assignments", label: "Ödevlerim", icon: ClipboardList },
+  { href: "/student/materials", label: "Kaynaklar", icon: BookOpen },
   { href: "/student/questions", label: "Öğretmene Sor", icon: MessageCircle },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
 ];
