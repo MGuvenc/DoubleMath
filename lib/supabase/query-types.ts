@@ -123,3 +123,58 @@ export interface MaterialRow {
   topic: string | null;
   created_at: string;
 }
+
+export interface QuizRow {
+  id: string;
+  title: string;
+  description: string | null;
+  time_limit_minutes: number | null;
+  is_published: boolean;
+  created_at: string;
+}
+
+export interface QuizOptionRow {
+  id: string;
+  question_id: string;
+  option_text: string;
+  is_correct: boolean;
+  order_index: number;
+}
+
+// Öğrenciye gönderilen versiyon: is_correct KESİNLİKLE bulunmaz
+export interface QuizOptionForStudent {
+  id: string;
+  question_id: string;
+  option_text: string;
+  order_index: number;
+}
+
+export interface QuizQuestionRow {
+  id: string;
+  quiz_id: string;
+  question_text: string;
+  order_index: number;
+  quiz_options: QuizOptionRow[];
+}
+
+export interface QuizQuestionForStudent {
+  id: string;
+  quiz_id: string;
+  question_text: string;
+  order_index: number;
+  quiz_options: QuizOptionForStudent[];
+}
+
+export interface QuizAttemptRow {
+  id: string;
+  quiz_id: string;
+  student_id: string;
+  time_limit_minutes: number | null;
+  started_at: string;
+  submitted_at: string | null;
+  score: number | null;
+}
+
+export interface QuizAttemptWithStudentRow extends QuizAttemptRow {
+  profiles: { full_name: string; email: string } | null;
+}
