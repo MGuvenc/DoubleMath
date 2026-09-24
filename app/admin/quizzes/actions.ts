@@ -8,6 +8,10 @@ export type QuizActionResultWithId = { error: string } | { success: true; id: st
 
 export async function createQuiz(formData: FormData): Promise<QuizActionResultWithId> {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Giriş yapmalısın." };
 
   const title = formData.get("title") as string;
   const description = (formData.get("description") as string) || null;
@@ -18,13 +22,13 @@ export async function createQuiz(formData: FormData): Promise<QuizActionResultWi
 
   const { data, error } = await supabase
     .from("quizzes")
-    .insert({ title, description, time_limit_minutes: timeLimit })
+    .insert({ title, description, time_limit_minutes: timeLimit, created_by: user.id })
     .select("id")
     .single<{ id: string }>();
 
   if (error || !data) {
     console.error("Sınav oluşturulamadı:", error);
-    return { error: "Sınav oluşturulamadı. Yetkin olmayabilir." };
+    return { error: `Sınav oluşturulamadı: ${error?.message || "bilinmeyen hata"}` };
   }
 
   revalidatePath("/admin/quizzes");

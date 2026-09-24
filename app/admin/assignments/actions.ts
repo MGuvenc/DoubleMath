@@ -11,6 +11,10 @@ function toIsoWithTurkeyOffset(date: string, time: string) {
 
 export async function createAssignment(formData: FormData): Promise<AssignmentActionResult> {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Giriş yapmalısın." };
 
   const title = formData.get("title") as string;
   const description = (formData.get("description") as string) || null;
@@ -28,13 +32,13 @@ export async function createAssignment(formData: FormData): Promise<AssignmentAc
 
   const { data: assignment, error: insertError } = await supabase
     .from("assignments")
-    .insert({ title, description, due_at: dueAt })
+    .insert({ title, description, due_at: dueAt, created_by: user.id })
     .select("id")
     .single<{ id: string }>();
 
   if (insertError || !assignment) {
     console.error("Ödev oluşturulamadı:", insertError);
-    return { error: "Ödev oluşturulamadı. Yetkin olmayabilir." };
+    return { error: `Ödev oluşturulamadı: ${insertError?.message || "bilinmeyen hata"}` };
   }
 
   const adminSupabase = createAdminClient();

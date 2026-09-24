@@ -7,6 +7,10 @@ export type MaterialActionResult = { error: string } | { success: true };
 
 export async function createMaterial(formData: FormData): Promise<MaterialActionResult> {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Giriş yapmalısın." };
 
   const title = formData.get("title") as string;
   const description = (formData.get("description") as string) || null;
@@ -19,7 +23,7 @@ export async function createMaterial(formData: FormData): Promise<MaterialAction
   if (type !== "pdf" && !externalUrl) return { error: "Video/link için bir URL girmelisin." };
   if (type === "pdf" && (!file || file.size === 0)) return { error: "PDF için bir dosya seçmelisin." };
 
-  const { data: material, error: insertError } = await supabase
+    const { data: material, error: insertError } = await supabase
     .from("materials")
     .insert({
       title,
@@ -27,15 +31,16 @@ export async function createMaterial(formData: FormData): Promise<MaterialAction
       type,
       topic,
       external_url: type === "pdf" ? null : externalUrl,
+      created_by: user.id,
     })
     .select("id")
     .single<{ id: string }>();
 
   if (insertError || !material) {
     console.error("Materyal oluşturulamadı:", insertError);
-    return { error: "Materyal oluşturulamadı. Yetkin olmayabilir." };
+    return { error: `Materyal oluşturulamadı: ${insertError?.message || "bilinmeyen hata"}` };
   }
-
+  
   if (type === "pdf" && file && file.size > 0) {
     const adminSupabase = createAdminClient();
     const path = `${Date.now()}-${file.name}`;
