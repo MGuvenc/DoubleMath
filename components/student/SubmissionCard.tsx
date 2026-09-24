@@ -21,7 +21,7 @@ export default function SubmissionCard({ submission }: { submission: StudentSubm
   const [error, setError] = useState<string | null>(null);
   const assignment = submission.assignments;
   const statusInfo = STATUS_LABELS[submission.status];
-  const canSubmit = submission.status === "pending" || submission.status === "late";
+  const canSubmit = !submission.submitted_at;
 
   if (!assignment) return null;
 

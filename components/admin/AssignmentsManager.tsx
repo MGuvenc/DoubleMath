@@ -238,33 +238,41 @@ function SubmissionRow({ submission }: { submission: AssignmentWithSubmissionsRo
           <span className="text-slate-400">—</span>
         )}
       </td>
-      <td className="py-2 pr-4">
-        <input
-          type="number"
-          min={0}
-          max={100}
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-          className="input w-20"
-        />
+    <td className="py-2 pr-4">
+        {submission.status === "pending" ? (
+          <span className="text-slate-300">—</span>
+        ) : (
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            className="input w-20"
+          />
+        )}
       </td>
       <td className="py-2">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Kısa yorum..."
-            className="input"
-          />
-          <button
-            onClick={handleGrade}
-            disabled={isPending}
-            className="whitespace-nowrap text-sm font-medium text-brand-600 hover:underline"
-          >
-            Kaydet
-          </button>
-        </div>
+        {submission.status === "pending" ? (
+          <span className="text-xs italic text-slate-400">Öğrenci henüz teslim etmedi</span>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="Kısa yorum..."
+              className="input"
+            />
+            <button
+              onClick={handleGrade}
+              disabled={isPending}
+              className="whitespace-nowrap text-sm font-medium text-brand-600 hover:underline"
+            >
+              Kaydet
+            </button>
+          </div>
+        )}
       </td>
     </tr>
   );

@@ -107,6 +107,17 @@ export async function gradeSubmission(
 ): Promise<AssignmentActionResult> {
   const supabase = createClient();
 
+  //Notlandırma teslim edilmeden önce yapılmasın
+  const { data: submission } = await supabase
+    .from("submissions")
+    .select("status, submitted_at")
+    .eq("id", submissionId)
+    .single<{ status: string; submitted_at: string | null }>();
+
+  if (!submission?.submitted_at) {
+    return { error: "Öğrenci henüz ödevi teslim etmedi, notlandırmadan önce teslim beklenmeli." };
+  }
+
   const { error } = await supabase
     .from("submissions")
     .update({
