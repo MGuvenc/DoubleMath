@@ -56,7 +56,7 @@ export async function addQuestion(quizId: string, formData: FormData): Promise<Q
 
   if (qError || !question) {
     console.error("Soru eklenemedi:", qError);
-    return { error: "Soru eklenemedi. Yetkin olmayabilir." };
+    return { error: `Soru eklenemedi: ${qError?.message || "bilinmeyen hata"}` };
   }
 
   const { error: oError } = await supabase.from("quiz_options").insert(
@@ -70,7 +70,7 @@ export async function addQuestion(quizId: string, formData: FormData): Promise<Q
 
   if (oError) {
     console.error("Seçenekler eklenemedi:", oError);
-    return { error: "Seçenekler eklenemedi." };
+    return { error: `Seçenekler eklenemedi: ${oError.message}` };
   }
 
   revalidatePath(`/admin/quizzes/${quizId}`);
@@ -80,7 +80,7 @@ export async function addQuestion(quizId: string, formData: FormData): Promise<Q
 export async function deleteQuestion(quizId: string, questionId: string): Promise<QuizActionResult> {
   const supabase = createClient();
   const { error } = await supabase.from("quiz_questions").delete().eq("id", questionId);
-  if (error) return { error: "Soru silinemedi." };
+  if (error) return { error: `Soru silinemedi: ${error.message}` };
   revalidatePath(`/admin/quizzes/${quizId}`);
   return { success: true };
 }
@@ -88,7 +88,7 @@ export async function deleteQuestion(quizId: string, questionId: string): Promis
 export async function togglePublish(quizId: string, publish: boolean): Promise<QuizActionResult> {
   const supabase = createClient();
   const { error } = await supabase.from("quizzes").update({ is_published: publish }).eq("id", quizId);
-  if (error) return { error: "Durum güncellenemedi." };
+  if (error) return { error: `Durum güncellenemedi: ${error.message}` };
   revalidatePath(`/admin/quizzes/${quizId}`);
   revalidatePath("/admin/quizzes");
   revalidatePath("/student/quizzes");
@@ -98,7 +98,7 @@ export async function togglePublish(quizId: string, publish: boolean): Promise<Q
 export async function deleteQuiz(quizId: string): Promise<QuizActionResult> {
   const supabase = createClient();
   const { error } = await supabase.from("quizzes").delete().eq("id", quizId);
-  if (error) return { error: "Sınav silinemedi." };
+  if (error) return { error: `Sınav silinemedi: ${error.message}` };
   revalidatePath("/admin/quizzes");
   return { success: true };
 }
