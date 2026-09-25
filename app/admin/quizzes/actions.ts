@@ -48,9 +48,14 @@ export async function addQuestion(quizId: string, formData: FormData): Promise<Q
     return { error: "Soru metni ve en az 2 seçenek girmelisin." };
   }
 
+  const { count: existingCount } = await supabase
+    .from("quiz_questions")
+    .select("id", { count: "exact", head: true })
+    .eq("quiz_id", quizId);
+
   const { data: question, error: qError } = await supabase
     .from("quiz_questions")
-    .insert({ quiz_id: quizId, question_text: questionText, order_index: Date.now() })
+    .insert({ quiz_id: quizId, question_text: questionText, order_index: existingCount ?? 0 })
     .select("id")
     .single<{ id: string }>();
 

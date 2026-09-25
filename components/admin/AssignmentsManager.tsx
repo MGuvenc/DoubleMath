@@ -80,8 +80,14 @@ export default function AssignmentsManager({
             <input type="time" name="due_time" defaultValue="23:59" className="input" />
           </div>
           <div className="sm:col-span-2">
-            <label className="label">Ek Dosya (PDF)</label>
-            <input type="file" name="attachment" accept="application/pdf" className="input" />
+            <label className="label">Ek Dosya</label>
+            <input
+              type="file"
+              name="attachment"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.zip"
+              className="input"
+            />
+            <p className="mt-1 text-xs text-slate-400">PDF, Word, PowerPoint, Excel, resim veya zip — maksimum 50MB</p>
           </div>
 
           <div className="sm:col-span-2">

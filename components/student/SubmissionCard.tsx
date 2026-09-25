@@ -68,7 +68,8 @@ export default function SubmissionCard({ submission }: { submission: StudentSubm
       {canSubmit ? (
         <form onSubmit={handleSubmit} className="mt-4 border-t border-slate-100 pt-4">
           <label className="label">Dosyanı Yükle *</label>
-          <input type="file" name="file" required className="input" />
+          <input type="file" name="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" required className="input" />
+          <p className="mt-1 text-xs text-slate-400">PDF, Word veya resim — maksimum 10MB</p>
           <label className="label mt-3">Not (opsiyonel)</label>
           <textarea name="note" rows={2} className="input" placeholder="Öğretmenine iletmek istediğin bir not..." />
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

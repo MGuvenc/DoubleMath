@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { validateFile, STUDENT_MAX_SIZE_BYTES, STUDENT_ALLOWED_TYPES } from "@/lib/file-validation";
 
 export type SubmissionActionResult = { error: string } | { success: true };
 
@@ -21,6 +22,11 @@ export async function submitAssignment(
 
   if (!file || file.size === 0) {
     return { error: "Lütfen teslim edeceğin dosyayı seç." };
+  }
+
+  const validation = validateFile(file, STUDENT_MAX_SIZE_BYTES, STUDENT_ALLOWED_TYPES, "10MB");
+  if (!validation.valid) {
+    return { error: validation.error! };
   }
 
   const { data: assignment } = await supabase

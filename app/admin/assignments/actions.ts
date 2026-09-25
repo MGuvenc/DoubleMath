@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { validateFile, TEACHER_MAX_SIZE_BYTES, TEACHER_ALLOWED_TYPES } from "@/lib/file-validation";
 
 export type AssignmentActionResult = { error: string } | { success: true };
 
@@ -45,17 +46,12 @@ export async function createAssignment(formData: FormData): Promise<AssignmentAc
 
   // Dosya varsa yükle ve ödev satırına bağla
   if (file && file.size > 0) {
-    const path = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await adminSupabase.storage
-      .from("assignments")
-      .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-      console.error("Dosya yüklenemedi:", uploadError);
-      return { error: "Ödev oluşturuldu ama dosya yüklenemedi." };
+    const validation = validateFile(file, TEACHER_MAX_SIZE_BYTES, TEACHER_ALLOWED_TYPES, "50MB");
+    if (!validation.valid) {
+      return { error: validation.error! };
     }
-    await supabase.from("assignments").update({ attachment_url: path }).eq("id", assignment.id);
-  }
+
+    const path = `${Date.now()}-${file.name}`;
 
   // Hedef öğrencileri belirle
   let targetStudentIds: string[] = studentIds;
@@ -130,7 +126,7 @@ export async function gradeSubmission(
 
   if (error) {
     console.error("Not verilemedi:", error);
-    return { error: "Not verilemedi." };
+    return { error: `Not verilemedi: ${error.message}` };
   }
 
   revalidatePath("/admin/assignments");

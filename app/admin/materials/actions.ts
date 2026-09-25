@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { validateFile, TEACHER_MAX_SIZE_BYTES } from "@/lib/file-validation";
 
 export type MaterialActionResult = { error: string } | { success: true };
 
@@ -22,7 +23,11 @@ export async function createMaterial(formData: FormData): Promise<MaterialAction
   if (!title || !type) return { error: "Başlık ve tür zorunludur." };
   if (type !== "pdf" && !externalUrl) return { error: "Video/link için bir URL girmelisin." };
   if (type === "pdf" && (!file || file.size === 0)) return { error: "PDF için bir dosya seçmelisin." };
-
+  if (type === "pdf" && file) {
+    const validation = validateFile(file, TEACHER_MAX_SIZE_BYTES, ["application/pdf"], "50MB");
+    if (!validation.valid) return { error: validation.error! };
+  }
+  
     const { data: material, error: insertError } = await supabase
     .from("materials")
     .insert({

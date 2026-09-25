@@ -89,6 +89,7 @@ export default function MaterialsManager({ materials }: { materials: MaterialRow
             <div className="sm:col-span-2">
               <label className="label">PDF Dosyası *</label>
               <input type="file" name="file" accept="application/pdf" className="input" />
+              <p className="mt-1 text-xs text-slate-400">Maksimum 50MB</p>
             </div>
           ) : (
             <div className="sm:col-span-2">

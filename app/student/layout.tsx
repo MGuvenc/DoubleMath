@@ -18,9 +18,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
     .single<ProfileFullRow>();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50 sm:flex-row">
       <StudentSidebar studentName={profile?.full_name || ""} />
-      <main className="flex-1 p-4 sm:p-8">{children}</main>
+      <main className="flex-1 p-4 pb-8 sm:p-8">{children}</main>
     </div>
   );
 }
