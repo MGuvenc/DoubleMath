@@ -44,14 +44,24 @@ export async function createAssignment(formData: FormData): Promise<AssignmentAc
 
   const adminSupabase = createAdminClient();
 
-  // Dosya varsa yükle ve ödev satırına bağla
-  if (file && file.size > 0) {
-    const validation = validateFile(file, TEACHER_MAX_SIZE_BYTES, TEACHER_ALLOWED_TYPES, "50MB");
-    if (!validation.valid) {
-      return { error: validation.error! };
-    }
+    // Dosya varsa yükle ve ödev satırına bağla
+    if (file && file.size > 0) {
+      const validation = validateFile(file, TEACHER_MAX_SIZE_BYTES, TEACHER_ALLOWED_TYPES, "50MB");
+      if (!validation.valid) {
+        return { error: validation.error! };
+      }
 
     const path = `${Date.now()}-${file.name}`;
+    const { error: uploadError } = await adminSupabase.storage
+      .from("assignments")
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Dosya yüklenemedi:", uploadError);
+      return { error: "Ödev oluşturuldu ama dosya yüklenemedi." };
+    }
+    await supabase.from("assignments").update({ attachment_url: path }).eq("id", assignment.id);
+  }
 
   // Hedef öğrencileri belirle
   let targetStudentIds: string[] = studentIds;
