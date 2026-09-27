@@ -9,7 +9,8 @@ export default function ContactForm() {
     e.preventDefault();
     setStatus("loading");
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
 
     try {
@@ -20,7 +21,7 @@ export default function ContactForm() {
       });
       if (!res.ok) throw new Error();
       setStatus("success");
-      e.currentTarget.reset();
+      form.reset();
     } catch {
       setStatus("error");
     }
