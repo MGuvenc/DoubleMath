@@ -17,7 +17,7 @@ import type { QuizRow, QuizQuestionRow, QuizAttemptWithStudentRow } from "@/lib/
 function isoToTurkeyDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
-  const turkeyShifted = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  const turkeyShifted = new Date(d.getTime() + 6 * 60 * 60 * 1000);
   return turkeyShifted.toISOString().slice(0, 16);
 }
 

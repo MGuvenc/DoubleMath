@@ -44,9 +44,9 @@ export default async function StudentQuizzesPage() {
                 <div>
                   <p className="font-medium text-slate-900">{q.title}</p>
                     <p className="text-xs text-slate-400">
-                    {q.time_limit_minutes ? '${q.time_limit_minutes} dakika' : "Süresiz"}
+                    {q.time_limit_minutes ? `${q.time_limit_minutes} dakika` : "Süresiz"}
                     {q.available_until &&
-                    ' — Son tarih: ${new Date(q.available_until).toLocaleString("tr-TR")}'}
+                    ` — Son tarih: ${new Date(q.available_until).toLocaleString("tr-TR")}`}
                   </p>
                 </div>
               </div>
