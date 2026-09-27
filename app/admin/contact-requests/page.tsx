@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ContactRequestRow } from "@/lib/supabase/query-types";
+import { updateContactRequestStatus } from "./actions";
 
 export default async function AdminContactRequestsPage() {
   const supabase = createClient();
@@ -67,15 +68,24 @@ export default async function AdminContactRequestsPage() {
                     })}
                   </td>
                   <td className="py-3">
-                    <span
-                      className={
-                        request.is_handled
-                          ? "text-slate-500"
-                          : "font-medium text-emerald-700"
-                      }
-                    >
-                      {request.is_handled ? "İşlendi" : "Yeni"}
-                    </span>
+                    <div className="space-y-2">
+                      <span
+                        className={
+                          request.is_handled
+                            ? "inline-flex rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
+                            : "inline-flex rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700"
+                        }
+                      >
+                        {request.is_handled ? "Dönüş yapıldı" : "Dönüş bekliyor"}
+                      </span>
+                      <form action={updateContactRequestStatus}>
+                        <input type="hidden" name="request_id" value={request.id} />
+                        <input type="hidden" name="is_handled" value={String(!request.is_handled)} />
+                        <button type="submit" className="text-left text-xs font-medium text-brand-700 hover:underline">
+                          {request.is_handled ? "Bekliyor olarak işaretle" : "Dönüş yapıldı olarak işaretle"}
+                        </button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}
