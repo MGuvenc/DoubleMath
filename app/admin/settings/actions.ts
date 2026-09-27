@@ -39,8 +39,8 @@ export async function saveInstagramSettings(formData: FormData): Promise<Setting
   const guard = await requireAdmin();
   if (!guard.ok) return { error: guard.error };
 
-  const accessToken = (formData.get("access_token") as string) || "";
-  const businessAccountId = (formData.get("business_account_id") as string) || "";
+  const accessToken = ((formData.get("access_token") as string) || "").trim();
+  const businessAccountId = ((formData.get("business_account_id") as string) || "").trim();
 
   const adminSupabase = createAdminClient();
 
@@ -76,19 +76,19 @@ export async function syncInstagramPosts(): Promise<SyncResult> {
     .returns<{ key: string; value: string | null }[]>();
 
   const map = new Map((rows || []).map((r) => [r.key, r.value || ""]));
-  const token = map.get("instagram_access_token");
-  const businessId = map.get("instagram_business_account_id");
+  const token = map.get("instagram_access_token")?.trim();
+  const businessId = map.get("instagram_business_account_id")?.trim();
 
   if (!token || !businessId) {
     return { error: "Önce Instagram Access Token ve Business Account ID'yi kaydet." };
   }
 
   try {
-    const url = `https://graph.facebook.com/v26.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&access_token=${encodeURIComponent(
-      token
-    )}&limit=12`;
+    const url = `https://graph.facebook.com/v26.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=12`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const json = await res.json();
 
     if (json.error) {
