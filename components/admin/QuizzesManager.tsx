@@ -58,6 +58,18 @@ export default function QuizzesManager({ quizzes }: { quizzes: QuizRow[] }) {
               placeholder="Boş = süresiz"
             />
           </div>
+          <div>
+            <label className="label">Başlangıç Tarihi/Saati</label>
+            <input type="datetime-local" name="available_from" className="input" />
+          </div>
+          <div>
+            <label className="label">Bitiş Tarihi/Saati</label>
+            <input type="datetime-local" name="available_until" className="input" />
+          </div>
+          <p className="text-xs text-slate-400 sm:col-span-2">
+            Boş bırakılırsa sınav her zaman erişilebilir olur. Bitiş tarihi girilirse, doğru
+            cevaplar öğrencilere ancak bitiş + süre kadar zaman geçtikten sonra gösterilir.
+          </p>
           {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
           <div className="flex gap-3 sm:col-span-2">
             <button type="submit" disabled={isPending} className="btn-primary">
@@ -87,6 +99,10 @@ export default function QuizzesManager({ quizzes }: { quizzes: QuizRow[] }) {
                 <p className="text-xs text-slate-400">
                   {format(new Date(q.created_at), "d MMM yyyy", { locale: tr })}
                   {q.time_limit_minutes ? ` — ${q.time_limit_minutes} dk` : " — Süresiz"}
+                  {q.available_from &&
+                    ` — ${format(new Date(q.available_from), "d MMM HH:mm", { locale: tr })}'dan itibaren`}
+                  {q.available_until &&
+                    ` ${format(new Date(q.available_until), "d MMM HH:mm", { locale: tr })}'a kadar`}
                 </p>
               </div>
             </div>

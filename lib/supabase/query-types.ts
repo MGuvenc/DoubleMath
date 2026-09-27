@@ -129,6 +129,8 @@ export interface QuizRow {
   title: string;
   description: string | null;
   time_limit_minutes: number | null;
+  available_from: string | null;
+  available_until: string | null;
   is_published: boolean;
   created_at: string;
 }

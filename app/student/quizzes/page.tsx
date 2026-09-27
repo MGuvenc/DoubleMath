@@ -43,8 +43,10 @@ export default async function StudentQuizzesPage() {
                 <ClipboardCheck className="h-5 w-5 text-brand-600" />
                 <div>
                   <p className="font-medium text-slate-900">{q.title}</p>
-                  <p className="text-xs text-slate-400">
-                    {q.time_limit_minutes ? `${q.time_limit_minutes} dakika` : "Süresiz"}
+                    <p className="text-xs text-slate-400">
+                    {q.time_limit_minutes ? '${q.time_limit_minutes} dakika' : "Süresiz"}
+                    {q.available_until &&
+                    ' — Son tarih: ${new Date(q.available_until).toLocaleString("tr-TR")}'}
                   </p>
                 </div>
               </div>

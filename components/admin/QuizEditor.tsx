@@ -5,8 +5,21 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Plus, Trash2, CheckCircle2 } from "lucide-react";
-import { addQuestion, deleteQuestion, togglePublish, deleteQuiz } from "@/app/admin/quizzes/actions";
+import {
+  addQuestion,
+  deleteQuestion,
+  togglePublish,
+  deleteQuiz,
+  updateQuizAvailability,
+} from "@/app/admin/quizzes/actions";
 import type { QuizRow, QuizQuestionRow, QuizAttemptWithStudentRow } from "@/lib/supabase/query-types";
+
+function isoToTurkeyDatetimeLocal(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const turkeyShifted = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  return turkeyShifted.toISOString().slice(0, 16);
+}
 
 export default function QuizEditor({
   quiz,
@@ -21,6 +34,8 @@ export default function QuizEditor({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [correctIndex, setCorrectIndex] = useState(0);
+  const [showAvailabilityForm, setShowAvailabilityForm] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   function handleAddQuestion(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,9 +63,16 @@ export default function QuizEditor({
     });
   }
 
+  const [publishError, setPublishError] = useState<string | null>(null);
+
   function handleTogglePublish() {
+    setPublishError(null);
     startTransition(async () => {
-      await togglePublish(quiz.id, !quiz.is_published);
+      const result = await togglePublish(quiz.id, !quiz.is_published);
+      if ("error" in result) {
+        setPublishError(result.error);
+        return;
+      }
       router.refresh();
     });
   }
@@ -63,6 +85,23 @@ export default function QuizEditor({
     });
   }
 
+  function handleUpdateAvailability(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setAvailabilityError(null);
+    const formData = new FormData(e.currentTarget);
+    startTransition(async () => {
+      const result = await updateQuizAvailability(quiz.id, formData);
+      if ("error" in result) {
+        setAvailabilityError(result.error);
+        return;
+      }
+      setShowAvailabilityForm(false);
+      router.refresh();
+    });
+  }
+
+  const canPublish = questions.length > 0;
+
   return (
     <div>
       <div className="flex items-start justify-between gap-4">
@@ -73,25 +112,81 @@ export default function QuizEditor({
             {quiz.time_limit_minutes ? `${quiz.time_limit_minutes} dakika süreli` : "Süresiz"} —{" "}
             {questions.length} soru
           </p>
+          {(quiz.available_from || quiz.available_until) && (
+            <p className="mt-1 text-sm text-slate-500">
+              {quiz.available_from &&
+                `Başlangıç: ${format(new Date(quiz.available_from), "d MMM yyyy, HH:mm", { locale: tr })}`}
+              {quiz.available_from && quiz.available_until && " — "}
+              {quiz.available_until &&
+                `Bitiş: ${format(new Date(quiz.available_until), "d MMM yyyy, HH:mm", { locale: tr })}`}
+            </p>
+          )}
         </div>
-        <div className="flex flex-shrink-0 gap-2">
-          <button
-            onClick={handleTogglePublish}
-            disabled={isPending}
-            className={quiz.is_published ? "btn-secondary" : "btn-primary"}
-          >
-            {quiz.is_published ? "Yayından Kaldır" : "Yayınla"}
-          </button>
-          <button onClick={handleDeleteQuiz} className="btn-secondary text-red-600">
-            Sınavı Sil
-          </button>
+        <div className="flex flex-shrink-0 flex-col items-end gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={handleTogglePublish}
+              disabled={isPending || (!quiz.is_published && !canPublish)}
+              title={!canPublish && !quiz.is_published ? "Önce en az bir soru ekle" : undefined}
+              className={quiz.is_published ? "btn-secondary" : "btn-primary disabled:opacity-50"}
+            >
+              {quiz.is_published ? "Yayından Kaldır" : "Yayınla"}
+            </button>
+            <button onClick={handleDeleteQuiz} className="btn-secondary text-red-600">
+              Sınavı Sil
+            </button>
+          </div>
+          {publishError && <p className="text-xs text-red-600">{publishError}</p>}
         </div>
       </div>
 
-      {quiz.is_published && questions.length === 0 && (
-        <p className="mt-3 text-sm text-amber-600">
-          Bu sınav yayında ama hiç sorusu yok — öğrenciler boş bir sınav görecek.
-        </p>
+      <button
+        onClick={() => setShowAvailabilityForm((v) => !v)}
+        className="mt-3 text-sm font-medium text-brand-600 hover:underline"
+      >
+        {showAvailabilityForm ? "Zaman ayarlarını kapat" : "Süre / tarih aralığını düzenle"}
+      </button>
+
+      {showAvailabilityForm && (
+        <form onSubmit={handleUpdateAvailability} className="card mt-3 grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="label">Süre (dakika)</label>
+            <input
+              type="number"
+              name="time_limit_minutes"
+              min={1}
+              defaultValue={quiz.time_limit_minutes ?? ""}
+              placeholder="Boş = süresiz"
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Başlangıç Tarihi/Saati</label>
+            <input
+              type="datetime-local"
+              name="available_from"
+              defaultValue={isoToTurkeyDatetimeLocal(quiz.available_from)}
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Bitiş Tarihi/Saati</label>
+            <input
+              type="datetime-local"
+              name="available_until"
+              defaultValue={isoToTurkeyDatetimeLocal(quiz.available_until)}
+              className="input"
+            />
+          </div>
+          {availabilityError && (
+            <p className="text-sm text-red-600 sm:col-span-3">{availabilityError}</p>
+          )}
+          <div className="sm:col-span-3">
+            <button type="submit" disabled={isPending} className="btn-primary">
+              {isPending ? "Kaydediliyor..." : "Kaydet"}
+            </button>
+          </div>
+        </form>
       )}
 
       <div className="mt-8">

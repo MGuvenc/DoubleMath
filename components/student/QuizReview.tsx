@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { QuizOptionRow } from "@/lib/supabase/query-types";
 
 interface ReviewQuestion {
@@ -13,11 +13,15 @@ export default function QuizReview({
   score,
   questions,
   myAnswers,
+  canReveal,
+  revealAt,
 }: {
   quizTitle: string;
   score: number | null;
   questions: ReviewQuestion[];
   myAnswers: { question_id: string; selected_option_id: string | null }[];
+  canReveal: boolean;
+  revealAt: string | null;
 }) {
   const answerMap = new Map(myAnswers.map((a) => [a.question_id, a.selected_option_id]));
 
@@ -28,6 +32,16 @@ export default function QuizReview({
         <p className="text-sm text-slate-600">Sonucun</p>
         <p className="text-3xl font-bold text-brand-700">{score ?? 0}/100</p>
       </div>
+
+      {!canReveal && revealAt && (
+        <div className="card mt-4 flex items-center gap-3 bg-amber-50">
+          <Clock className="h-5 w-5 flex-shrink-0 text-amber-600" />
+          <p className="text-sm text-amber-800">
+            Doğru cevaplar, sınav süresi herkes için tamamen bittikten sonra —{" "}
+            <strong>{new Date(revealAt).toLocaleString("tr-TR")}</strong> — burada görünür olacak.
+          </p>
+        </div>
+      )}
 
       <div className="mt-6 space-y-4">
         {questions.map((q, i) => {
@@ -40,6 +54,21 @@ export default function QuizReview({
               <div className="mt-3 space-y-2">
                 {q.quiz_options.map((opt) => {
                   const isMine = mySelectedId === opt.id;
+
+                  if (!canReveal) {
+                    return (
+                      <div
+                        key={opt.id}
+                        className={`flex items-center gap-2 rounded-lg border p-2.5 text-sm ${
+                          isMine ? "border-brand-400 bg-brand-50" : "border-slate-200"
+                        }`}
+                      >
+                        {opt.option_text}
+                        {isMine && <span className="ml-auto text-xs text-slate-400">Senin cevabın</span>}
+                      </div>
+                    );
+                  }
+
                   const isCorrect = opt.is_correct;
                   let className = "border-slate-200";
                   if (isCorrect) className = "border-green-400 bg-green-50";

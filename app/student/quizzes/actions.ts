@@ -16,11 +16,26 @@ export async function startQuizAttempt(quizId: string): Promise<QuizAttemptResul
 
   const { data: quiz } = await supabase
     .from("quizzes")
-    .select("id, time_limit_minutes")
+    .select("id, time_limit_minutes, available_from, available_until")
     .eq("id", quizId)
-    .single<{ id: string; time_limit_minutes: number | null }>();
+    .single<{
+      id: string;
+      time_limit_minutes: number | null;
+      available_from: string | null;
+      available_until: string | null;
+    }>();
 
   if (!quiz) return { error: "Bu sınava erişimin yok." };
+
+  const now = new Date();
+  if (quiz.available_from && now < new Date(quiz.available_from)) {
+    return {
+      error: `Bu sınav henüz başlamadı. Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR")}`,
+    };
+  }
+  if (quiz.available_until && now > new Date(quiz.available_until)) {
+    return { error: "Bu sınavın süresi doldu, artık başlanamaz." };
+  }
 
   const { data: existing } = await supabase
     .from("quiz_attempts")

@@ -6,6 +6,11 @@ import { revalidatePath } from "next/cache";
 export type QuizActionResult = { error: string } | { success: true };
 export type QuizActionResultWithId = { error: string } | { success: true; id: string };
 
+function turkeyDatetimeLocalToIso(value: string): string | null {
+  if (!value) return null;
+  return new Date(`${value}:00+03:00`).toISOString();
+}
+
 export async function createQuiz(formData: FormData): Promise<QuizActionResultWithId> {
   const supabase = createClient();
   const {
@@ -17,12 +22,24 @@ export async function createQuiz(formData: FormData): Promise<QuizActionResultWi
   const description = (formData.get("description") as string) || null;
   const timeLimitRaw = formData.get("time_limit_minutes") as string;
   const timeLimit = timeLimitRaw ? Number(timeLimitRaw) : null;
+  const availableFrom = turkeyDatetimeLocalToIso(formData.get("available_from") as string);
+  const availableUntil = turkeyDatetimeLocalToIso(formData.get("available_until") as string);
 
   if (!title) return { error: "Başlık zorunludur." };
+  if (availableFrom && availableUntil && new Date(availableFrom) >= new Date(availableUntil)) {
+    return { error: "Bitiş tarihi başlangıçtan sonra olmalıdır." };
+  }
 
   const { data, error } = await supabase
     .from("quizzes")
-    .insert({ title, description, time_limit_minutes: timeLimit, created_by: user.id })
+    .insert({
+      title,
+      description,
+      time_limit_minutes: timeLimit,
+      available_from: availableFrom,
+      available_until: availableUntil,
+      created_by: user.id,
+    })
     .select("id")
     .single<{ id: string }>();
 
@@ -33,6 +50,37 @@ export async function createQuiz(formData: FormData): Promise<QuizActionResultWi
 
   revalidatePath("/admin/quizzes");
   return { success: true, id: data.id };
+}
+
+export async function updateQuizAvailability(
+  quizId: string,
+  formData: FormData
+): Promise<QuizActionResult> {
+  const supabase = createClient();
+
+  const timeLimitRaw = formData.get("time_limit_minutes") as string;
+  const timeLimit = timeLimitRaw ? Number(timeLimitRaw) : null;
+  const availableFrom = turkeyDatetimeLocalToIso(formData.get("available_from") as string);
+  const availableUntil = turkeyDatetimeLocalToIso(formData.get("available_until") as string);
+
+  if (availableFrom && availableUntil && new Date(availableFrom) >= new Date(availableUntil)) {
+    return { error: "Bitiş tarihi başlangıçtan sonra olmalıdır." };
+  }
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update({
+      time_limit_minutes: timeLimit,
+      available_from: availableFrom,
+      available_until: availableUntil,
+    })
+    .eq("id", quizId);
+
+  if (error) return { error: `Güncellenemedi: ${error.message}` };
+
+  revalidatePath(`/admin/quizzes/${quizId}`);
+  revalidatePath("/student/quizzes");
+  return { success: true };
 }
 
 export async function addQuestion(quizId: string, formData: FormData): Promise<QuizActionResult> {
@@ -92,6 +140,19 @@ export async function deleteQuestion(quizId: string, questionId: string): Promis
 
 export async function togglePublish(quizId: string, publish: boolean): Promise<QuizActionResult> {
   const supabase = createClient();
+
+  if (publish) {
+    // Soru olmadan yayınlamayı engelle
+    const { count } = await supabase
+      .from("quiz_questions")
+      .select("id", { count: "exact", head: true })
+      .eq("quiz_id", quizId);
+
+    if (!count || count === 0) {
+      return { error: "Hiç sorusu olmayan bir sınav yayınlanamaz. Önce en az bir soru ekle." };
+    }
+  }
+
   const { error } = await supabase.from("quizzes").update({ is_published: publish }).eq("id", quizId);
   if (error) return { error: `Durum güncellenemedi: ${error.message}` };
   revalidatePath(`/admin/quizzes/${quizId}`);

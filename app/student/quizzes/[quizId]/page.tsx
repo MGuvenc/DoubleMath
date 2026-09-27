@@ -46,6 +46,14 @@ export default async function StudentQuizPage({ params }: { params: { quizId: st
           {questionCount || 0} soru —{" "}
           {quiz.time_limit_minutes ? `${quiz.time_limit_minutes} dakika süre` : "süre sınırı yok"}
         </p>
+        {(quiz.available_from || quiz.available_until) && (
+          <p className="mt-1 text-sm text-slate-500">
+            {quiz.available_from &&
+              `Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR")}`}
+            {quiz.available_from && quiz.available_until && " — "}
+            {quiz.available_until && `Bitiş: ${new Date(quiz.available_until).toLocaleString("tr-TR")}`}
+          </p>
+        )}
         <p className="mt-2 text-xs text-amber-600">
           Sınava başladıktan sonra geri dönemezsin, tek deneme hakkın var.
         </p>
@@ -97,12 +105,25 @@ export default async function StudentQuizPage({ params }: { params: { quizId: st
     .eq("attempt_id", attempt.id)
     .returns<{ question_id: string; selected_option_id: string | null }[]>();
 
+  // Sınav bitince cevapları göster
+  let canReveal = true;
+  let revealAt: string | null = null;
+  if (quiz.available_until) {
+    const reveal = new Date(
+      new Date(quiz.available_until).getTime() + (quiz.time_limit_minutes || 0) * 60000
+    );
+    revealAt = reveal.toISOString();
+    canReveal = new Date() >= reveal;
+  }
+
   return (
     <QuizReview
       quizTitle={quiz.title}
       score={attempt.score}
       questions={reviewQuestions || []}
       myAnswers={myAnswers || []}
+      canReveal={canReveal}
+      revealAt={revealAt}
     />
   );
 }
