@@ -76,7 +76,10 @@ export default async function PricingPage() {
                   </ul>
                 )}
 
-                <Link href="/contact" className="btn-primary mt-6 text-center">
+                <Link
+                  href={`/contact?package=${encodeURIComponent(p.name)}`}
+                  className="btn-primary mt-6 text-center"
+                >
                   Bu Paketi İste
                 </Link>
               </div>

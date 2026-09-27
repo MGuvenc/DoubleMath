@@ -78,6 +78,7 @@ export interface ContactRequestRow {
   email: string;
   phone: string | null;
   grade_level: string | null;
+  package_name: string | null;
   message: string | null;
   is_handled: boolean;
   created_at: string;

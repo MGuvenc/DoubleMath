@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ContactForm() {
+export default function ContactForm({ packageName = "" }: { packageName?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -39,6 +39,12 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-4">
+      {packageName && (
+        <p className="rounded-md bg-brand-50 px-3 py-2 text-sm text-brand-800">
+          İlgilendiğin paket: <strong>{packageName}</strong>
+        </p>
+      )}
+      <input type="hidden" name="package_name" value={packageName} />
       <div>
         <label className="label">Ad Soyad *</label>
         <input name="full_name" required className="input" />

@@ -8,7 +8,13 @@ export const metadata: Metadata = {
   description: "Matematik özel ders almak için bize ulaşın, ücretsiz ön görüşme talep edin.",
 };
 
-export default function ContactPage() {
+export default function ContactPage({
+  searchParams,
+}: {
+  searchParams: { package?: string | string[] };
+}) {
+  const packageName = typeof searchParams.package === "string" ? searchParams.package : "";
+
   return (
     <>
       <SiteHeader />
@@ -18,7 +24,7 @@ export default function ContactPage() {
           Formu doldur, en kısa sürede sana dönüş yapalım.
         </p>
         <div className="mt-8">
-          <ContactForm />
+          <ContactForm packageName={packageName} />
         </div>
       </main>
       <SiteFooter />

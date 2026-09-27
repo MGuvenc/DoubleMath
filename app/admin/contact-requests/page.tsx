@@ -5,7 +5,7 @@ export default async function AdminContactRequestsPage() {
   const supabase = createClient();
   const { data: requests, error } = await supabase
     .from("contact_requests")
-    .select("id, full_name, email, phone, grade_level, message, is_handled, created_at")
+    .select("id, full_name, email, phone, grade_level, package_name, message, is_handled, created_at")
     .order("created_at", { ascending: false })
     .returns<ContactRequestRow[]>();
 
@@ -28,6 +28,7 @@ export default async function AdminContactRequestsPage() {
                 <th className="pb-2 pr-4">Ad Soyad</th>
                 <th className="pb-2 pr-4">İletişim</th>
                 <th className="pb-2 pr-4">Seviye</th>
+                <th className="pb-2 pr-4">Paket</th>
                 <th className="pb-2 pr-4">Mesaj</th>
                 <th className="pb-2 pr-4">Tarih</th>
                 <th className="pb-2">Durum</th>
@@ -36,7 +37,7 @@ export default async function AdminContactRequestsPage() {
             <tbody>
               {!requests?.length && (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-slate-400">
+                  <td colSpan={7} className="py-6 text-center text-slate-400">
                     Henüz iletişim talebi yok.
                   </td>
                 </tr>
@@ -55,6 +56,7 @@ export default async function AdminContactRequestsPage() {
                     )}
                   </td>
                   <td className="py-3 pr-4 text-slate-600">{request.grade_level || "—"}</td>
+                  <td className="py-3 pr-4 text-slate-600">{request.package_name || "—"}</td>
                   <td className="max-w-sm whitespace-pre-wrap break-words py-3 pr-4 text-slate-600">
                     {request.message || "—"}
                   </td>

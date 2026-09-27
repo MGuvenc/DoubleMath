@@ -4,7 +4,7 @@ import { Resend } from "resend";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { full_name, email, phone, grade_level, message } = body;
+  const { full_name, email, phone, grade_level, message, package_name } = body;
 
   if (!full_name || !email) {
     return NextResponse.json({ error: "Ad ve e-posta zorunludur." }, { status: 400 });
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     phone,
     grade_level,
     message,
+    package_name: package_name || null,
   });
 
   if (error) {
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
           <p><strong>E-posta:</strong> ${email}</p>
           <p><strong>Telefon:</strong> ${phone || "-"}</p>
           <p><strong>Sınıf/Seviye:</strong> ${grade_level || "-"}</p>
+          <p><strong>İlgilendiği Paket:</strong> ${package_name || "-"}</p>
           <p><strong>Mesaj:</strong> ${message || "-"}</p>
         `,
       });
