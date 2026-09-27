@@ -84,7 +84,7 @@ export async function syncInstagramPosts(): Promise<SyncResult> {
   }
 
   try {
-    const url = `https://graph.facebook.com/v19.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&access_token=${encodeURIComponent(
+    const url = `https://graph.facebook.com/v26.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&access_token=${encodeURIComponent(
       token
     )}&limit=12`;
 
