@@ -84,7 +84,7 @@ export async function syncInstagramPosts(): Promise<SyncResult> {
   }
 
   try {
-    const url = `https://graph.facebook.com/v26.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=12`;
+    const url = `https://graph.instagram.com/v26.0/${businessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=12`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
