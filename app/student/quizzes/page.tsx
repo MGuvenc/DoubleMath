@@ -46,7 +46,9 @@ export default async function StudentQuizzesPage() {
                     <p className="text-xs text-slate-400">
                     {q.time_limit_minutes ? `${q.time_limit_minutes} dakika` : "Süresiz"}
                     {q.available_until &&
-                    ` — Son tarih: ${new Date(q.available_until).toLocaleString("tr-TR")}`}
+                    ` — Son tarih: ${new Date(q.available_until).toLocaleString("tr-TR", {
+                      timeZone: "Europe/Istanbul",
+                    })}`}
                   </p>
                 </div>
               </div>

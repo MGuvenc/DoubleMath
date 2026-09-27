@@ -49,9 +49,14 @@ export default async function StudentQuizPage({ params }: { params: { quizId: st
         {(quiz.available_from || quiz.available_until) && (
           <p className="mt-1 text-sm text-slate-500">
             {quiz.available_from &&
-              `Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR")}`}
+              `Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR", {
+                timeZone: "Europe/Istanbul",
+              })}`}
             {quiz.available_from && quiz.available_until && " — "}
-            {quiz.available_until && `Bitiş: ${new Date(quiz.available_until).toLocaleString("tr-TR")}`}
+            {quiz.available_until &&
+              `Bitiş: ${new Date(quiz.available_until).toLocaleString("tr-TR", {
+                timeZone: "Europe/Istanbul",
+              })}`}
           </p>
         )}
         <p className="mt-2 text-xs text-amber-600">

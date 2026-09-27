@@ -38,7 +38,9 @@ export default function QuizReview({
           <Clock className="h-5 w-5 flex-shrink-0 text-amber-600" />
           <p className="text-sm text-amber-800">
             Doğru cevaplar, sınav süresi herkes için tamamen bittikten sonra —{" "}
-            <strong>{new Date(revealAt).toLocaleString("tr-TR")}</strong> — burada görünür olacak.
+            <strong>
+              {new Date(revealAt).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}
+            </strong> — burada görünür olacak.
           </p>
         </div>
       )}

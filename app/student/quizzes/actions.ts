@@ -30,7 +30,9 @@ export async function startQuizAttempt(quizId: string): Promise<QuizAttemptResul
   const now = new Date();
   if (quiz.available_from && now < new Date(quiz.available_from)) {
     return {
-      error: `Bu sınav henüz başlamadı. Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR")}`,
+      error: `Bu sınav henüz başlamadı. Başlangıç: ${new Date(quiz.available_from).toLocaleString("tr-TR", {
+        timeZone: "Europe/Istanbul",
+      })}`,
     };
   }
   if (quiz.available_until && now > new Date(quiz.available_until)) {
