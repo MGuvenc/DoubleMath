@@ -180,3 +180,39 @@ export interface QuizAttemptRow {
 export interface QuizAttemptWithStudentRow extends QuizAttemptRow {
   profiles: { full_name: string; email: string } | null;
 }
+
+export interface ProductRow {
+  id: string;
+  type: "lesson_package" | "book" | "other";
+  name: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  lesson_count: number | null;
+  duration_months: number | null;
+  pricing_unit: "hourly" | "monthly" | "one_time";
+  features: string | null;
+  image_url: string | null;
+  stock: number | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface HomeContentJson {
+  hero?: { title: string; subtitle: string };
+  features?: { title: string; description: string }[];
+  whyUs?: string[];
+  cta?: { title: string; subtitle: string };
+}
+
+export interface InstagramPostRow {
+  id: string;
+  media_type: string | null;
+  media_url: string | null;
+  thumbnail_url: string | null;
+  permalink: string | null;
+  caption: string | null;
+  timestamp: string | null;
+  cached_at: string;
+}
