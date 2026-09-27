@@ -18,7 +18,7 @@ export default async function InstagramPage() {
     .from("instagram_posts")
     .select("*")
     .order("timestamp", { ascending: false })
-    .limit(24)
+    .limit(9)
     .returns<InstagramPostRow[]>();
 
   return (
@@ -36,7 +36,7 @@ export default async function InstagramPage() {
             Henüz gösterilecek bir gönderi yok.
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-10 grid grid-cols-3 gap-1">
             {posts.map((post) => {
               const imageUrl =
                 post.media_type === "VIDEO" ? post.thumbnail_url || post.media_url : post.media_url;
