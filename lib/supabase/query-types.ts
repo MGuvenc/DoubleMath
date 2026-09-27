@@ -72,6 +72,17 @@ export interface StudentOption {
   grade_level: string | null;
 }
 
+export interface ContactRequestRow {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  grade_level: string | null;
+  message: string | null;
+  is_handled: boolean;
+  created_at: string;
+}
+
 export interface LessonWithStudentRow extends LessonRow {
   profiles: { full_name: string; email: string } | null;
 }

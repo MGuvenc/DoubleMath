@@ -15,6 +15,7 @@ import {
   Megaphone,
   FileText,
   Newspaper,
+  Mail,
   Percent,
   DollarSign,
   ShoppingCart,
@@ -27,6 +28,7 @@ import {
 const LINKS = [
   { href: "/admin/dashboard", label: "Panel", icon: LayoutDashboard },
   { href: "/admin/students", label: "Öğrenciler", icon: Users },
+  { href: "/admin/contact-requests", label: "İletişim Talepleri", icon: Mail },
   { href: "/admin/lessons", label: "Ders Programı", icon: Calendar },
   { href: "/admin/assignments", label: "Ödevler", icon: ClipboardList },
   { href: "/admin/materials", label: "Kaynaklar", icon: BookOpen },
