@@ -1,30 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 import { MessageCircle, Plus } from "lucide-react";
-
-export async function createQuestion(formData: FormData) {
-  "use server";
-
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return;
-
-  const title = ((formData.get("title") as string) || "").trim();
-  if (!title) return;
-
-  const { error } = await supabase.from("questions").insert({
-    student_id: user.id,
-    title,
-    status: "open",
-  });
-
-  if (!error) {
-    revalidatePath("/student/questions");
-  }
-}
+import { createQuestion } from "./actions";
 
 export default async function StudentQuestionsPage() {
   const supabase = createClient();
