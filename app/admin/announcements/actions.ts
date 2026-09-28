@@ -42,7 +42,7 @@ export async function createAnnouncement(formData: FormData) {
           channel: "in_app",
           title: "Yeni duyuru",
           body: `${title} — ${body.slice(0, 120)}${body.length > 120 ? "..." : ""}`,
-          link: "/student/announcements",
+          link: `/student/announcements?id=${announcement.id}`,
         }))
       );
     }

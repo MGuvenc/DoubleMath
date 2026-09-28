@@ -18,6 +18,21 @@ export async function markAnnouncementAsRead(formData: FormData) {
   });
 
   if (!error) {
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("recipient_id", user.id)
+      .eq("link", `/student/announcements?id=${announcementId}`)
+      .eq("is_read", false);
+
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("recipient_id", user.id)
+      .eq("link", "/student/announcements")
+      .eq("is_read", false);
+
     revalidatePath("/student/announcements");
+    revalidatePath("/student");
   }
 }

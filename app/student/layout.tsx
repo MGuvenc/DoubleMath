@@ -17,15 +17,23 @@ export default async function StudentLayout({ children }: { children: React.Reac
     .eq("id", user.id)
     .single<ProfileFullRow>();
 
-  const { count } = await supabase
+  const { data: unreadNotifications } = await supabase
     .from("notifications")
-    .select("id", { count: "exact", head: true })
+    .select("link")
     .eq("recipient_id", user.id)
     .eq("is_read", false);
 
+  const unreadCounts = (unreadNotifications || []).reduce<Record<string, number>>((counts, notification) => {
+    if (notification.link) {
+      const href = notification.link.split("?")[0];
+      counts[href] = (counts[href] || 0) + 1;
+    }
+    return counts;
+  }, {});
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 sm:flex-row">
-      <StudentSidebar studentName={profile?.full_name || ""} unreadCount={count ?? 0} />
+      <StudentSidebar studentName={profile?.full_name || ""} unreadCounts={unreadCounts} />
       <main className="flex-1 p-4 pb-8 sm:p-8">{children}</main>
     </div>
   );

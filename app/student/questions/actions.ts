@@ -26,13 +26,19 @@ export async function createQuestion(formData: FormData) {
 
   if (error || !question) return;
 
-  await supabase.from("notifications").insert({
-    recipient_id: user.id,
-    channel: "in_app",
-    title: "Soru gönderildi",
-    body: "Öğretmene sorunuz iletildi. Cevap gelince burada göreceksiniz.",
-    link: "/student/questions",
-  });
+  const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
+
+  if (admins?.length) {
+    await supabase.from("notifications").insert(
+      admins.map((admin) => ({
+        recipient_id: admin.id,
+        channel: "in_app",
+        title: "Yeni öğrenci sorusu",
+        body: "Bir öğrenci Öğretmene Sor bölümünden yeni bir soru gönderdi.",
+        link: "/admin/questions",
+      }))
+    );
+  }
 
   revalidatePath("/student/questions");
 }

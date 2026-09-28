@@ -27,10 +27,9 @@ const LINKS = [
   { href: "/student/quizzes", label: "Sınavlar", icon: ClipboardCheck },
   { href: "/student/questions", label: "Öğretmene Sor", icon: MessageCircle },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
-  { href: "/student/notifications", label: "Bildirimler", icon: Bell },
 ];
 
-export default function StudentSidebar({ studentName, unreadCount }: { studentName: string; unreadCount: number }) {
+export default function StudentSidebar({ studentName, unreadCounts }: { studentName: string; unreadCounts: Record<string, number> }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -42,24 +41,56 @@ export default function StudentSidebar({ studentName, unreadCount }: { studentNa
     router.refresh();
   }
 
+  async function handleLinkClick(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    onNavigate?: () => void
+  ) {
+    const unreadCount = unreadCounts[href] || 0;
+    if (unreadCount === 0 || href === "/student/announcements") {
+      onNavigate?.();
+      return;
+    }
+
+    event.preventDefault();
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("recipient_id", user.id)
+        .eq("link", href)
+        .eq("is_read", false);
+    }
+
+    onNavigate?.();
+    router.push(href);
+    router.refresh();
+  }
+
   const navLinks = (onNavigate?: () => void) => (
     <>
       {LINKS.map((l) => {
         const active = pathname === l.href;
-        const showBadge = l.href === "/student/notifications" && unreadCount > 0;
+        const unreadCount = unreadCounts[l.href] || 0;
         return (
           <Link
             key={l.href}
             href={l.href}
-            onClick={onNavigate}
+            onClick={(event) => handleLinkClick(event, l.href, onNavigate)}
             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
               active ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50"
             }`}
           >
             <l.icon className="h-4 w-4" />
             <span className="flex-1">{l.label}</span>
-            {showBadge && (
-              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+            {unreadCount > 0 && (
+              <span className="inline-flex min-w-[1.5rem] items-center justify-center gap-1 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                <Bell className="h-3 w-3" />
                 {unreadCount}
               </span>
             )}
@@ -119,12 +150,6 @@ export default function StudentSidebar({ studentName, unreadCount }: { studentNa
         <div className="flex-shrink-0 p-4 pb-2">
           <p className="text-xs text-slate-500">Hoş geldin,</p>
           <p className="font-semibold text-slate-900">{studentName}</p>
-          {unreadCount > 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">
-              <Bell className="h-3.5 w-3.5" />
-              {unreadCount} okunmamış bildirim
-            </div>
-          )}
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-2">{navLinks()}</nav>
         <div className="flex-shrink-0 border-t border-slate-200 p-4">
