@@ -7,8 +7,10 @@ import { replyToQuestion } from "../actions";
 
 export default async function StudentQuestionConversationPage({
   params,
+  searchParams,
 }: {
   params: { questionId: string };
+  searchParams?: { error?: string };
 }) {
   const supabase = createClient();
   const {
@@ -44,7 +46,7 @@ export default async function StudentQuestionConversationPage({
     (messages || []).map(async (message) => {
       const attachmentUrl = message.attachment_url
         ? (await adminSupabase.storage
-            .from("question-attachments")
+            .from("submissions")
             .createSignedUrl(message.attachment_url, 3600)).data?.signedUrl || null
         : null;
 
@@ -77,6 +79,18 @@ export default async function StudentQuestionConversationPage({
           </div>
         </div>
       </div>
+
+      {searchParams?.error && (
+        <p role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {searchParams.error === "invalid-file"
+            ? "Dosya PDF/JPG/PNG/WebP olmalı ve 10 MB sınırını aşmamalı."
+            : searchParams.error === "upload-failed"
+              ? "Dosya yüklenemedi. Tekrar deneyin veya daha küçük bir PDF/resim seçin."
+              : searchParams.error === "message-save"
+                ? "Mesaj kaydedilemedi. Lütfen tekrar deneyin."
+                : "Mesaj veya dosya eklemeden gönderemezsiniz."}
+        </p>
+      )}
 
       <div className="space-y-4 py-6">
         {conversation.map((message) => {
@@ -127,7 +141,7 @@ export default async function StudentQuestionConversationPage({
         })}
       </div>
 
-      <form action={replyToQuestion} encType="multipart/form-data" className="border-t border-slate-200 pt-5">
+      <form action={replyToQuestion} className="border-t border-slate-200 pt-5">
         <input type="hidden" name="question_id" value={question.id} />
         <label htmlFor="reply-body" className="mb-2 block text-sm font-semibold text-slate-800">
           Mesaj yaz

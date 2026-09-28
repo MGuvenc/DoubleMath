@@ -12,17 +12,17 @@ export async function createQuestion(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return;
+  if (!user) redirect("/login");
 
   const title = ((formData.get("title") as string) || "").trim();
   const body = ((formData.get("body") as string) || "").trim();
   const attachment = formData.get("attachment");
   const file = attachment && typeof attachment !== "string" && attachment.size > 0 ? attachment : null;
 
-  if (!title || (!body && !file)) return;
+  if (!title || (!body && !file)) redirect("/student/questions?error=message-required");
   if (file) {
     const validation = validateFile(file, STUDENT_MAX_SIZE_BYTES, STUDENT_ALLOWED_TYPES, "10MB");
-    if (!validation.valid) return;
+    if (!validation.valid) redirect("/student/questions?error=invalid-file");
   }
 
   const adminSupabase = createAdminClient();
@@ -37,19 +37,20 @@ export async function createQuestion(formData: FormData) {
     .select("id")
     .single<{ id: string }>();
 
-  if (error || !question) return;
+  if (error || !question) redirect("/student/questions?error=question-create");
 
   let attachmentPath: string | null = null;
   if (file) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     attachmentPath = `${question.id}/${user.id}/${randomUUID()}-${safeName}`;
     const { error: uploadError } = await adminSupabase.storage
-      .from("question-attachments")
+      .from("submissions")
       .upload(attachmentPath, file, { contentType: file.type, upsert: false });
 
     if (uploadError) {
+      console.error("Soru eki yüklenemedi:", uploadError);
       await adminSupabase.from("questions").delete().eq("id", question.id);
-      return;
+      redirect("/student/questions?error=upload-failed");
     }
   }
 
@@ -61,9 +62,10 @@ export async function createQuestion(formData: FormData) {
   });
 
   if (messageError) {
+    console.error("Soru mesajı kaydedilemedi:", messageError);
     await adminSupabase.from("questions").delete().eq("id", question.id);
-    if (attachmentPath) await adminSupabase.storage.from("question-attachments").remove([attachmentPath]);
-    return;
+    if (attachmentPath) await adminSupabase.storage.from("submissions").remove([attachmentPath]);
+    redirect("/student/questions?error=message-save");
   }
 
   const { data: admins } = await adminSupabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
@@ -90,16 +92,17 @@ export async function replyToQuestion(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return;
+  if (!user) redirect("/login");
 
   const questionId = formData.get("question_id");
   const body = ((formData.get("body") as string) || "").trim();
   const attachment = formData.get("attachment");
   const file = attachment && typeof attachment !== "string" && attachment.size > 0 ? attachment : null;
-  if (typeof questionId !== "string" || !questionId || (!body && !file)) return;
+  if (typeof questionId !== "string" || !questionId) return;
+  if (!body && !file) redirect(`/student/questions/${questionId}?error=message-required`);
   if (file) {
     const validation = validateFile(file, STUDENT_MAX_SIZE_BYTES, STUDENT_ALLOWED_TYPES, "10MB");
-    if (!validation.valid) return;
+    if (!validation.valid) redirect(`/student/questions/${questionId}?error=invalid-file`);
   }
 
   const { data: question } = await supabase
@@ -116,9 +119,12 @@ export async function replyToQuestion(formData: FormData) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     attachmentPath = `${questionId}/${user.id}/${randomUUID()}-${safeName}`;
     const { error: uploadError } = await adminSupabase.storage
-      .from("question-attachments")
+      .from("submissions")
       .upload(attachmentPath, file, { contentType: file.type, upsert: false });
-    if (uploadError) return;
+    if (uploadError) {
+      console.error("Soru eki yüklenemedi:", uploadError);
+      redirect(`/student/questions/${questionId}?error=upload-failed`);
+    }
   }
 
   const { error } = await supabase.from("question_messages").insert({
@@ -129,8 +135,9 @@ export async function replyToQuestion(formData: FormData) {
   });
 
   if (error) {
-    if (attachmentPath) await adminSupabase.storage.from("question-attachments").remove([attachmentPath]);
-    return;
+    console.error("Soru mesajı kaydedilemedi:", error);
+    if (attachmentPath) await adminSupabase.storage.from("submissions").remove([attachmentPath]);
+    redirect(`/student/questions/${questionId}?error=message-save`);
   }
 
   await supabase
@@ -156,4 +163,5 @@ export async function replyToQuestion(formData: FormData) {
   revalidatePath("/student/questions");
   revalidatePath(`/student/questions/${questionId}`);
   revalidatePath("/admin/questions");
+  redirect(`/student/questions/${questionId}`);
 }

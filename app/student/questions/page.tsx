@@ -4,7 +4,11 @@ import { MessageCircle, Plus } from "lucide-react";
 import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { createQuestion } from "./actions";
 
-export default async function StudentQuestionsPage() {
+export default async function StudentQuestionsPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string };
+}) {
   const supabase = createClient();
   const {
     data: { user },
@@ -36,6 +40,20 @@ export default async function StudentQuestionsPage() {
       <h1 className="text-2xl font-bold text-slate-900">Öğretmene Sor</h1>
       <p className="mt-1 text-sm text-slate-500">Takıldığın konuları derhal öğretmenine iletebilirsin.</p>
 
+      {searchParams?.error && (
+        <p role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {searchParams.error === "invalid-file"
+            ? "Dosya PDF/JPG/PNG/WebP olmalı ve 10 MB sınırını aşmamalı."
+            : searchParams.error === "upload-failed"
+              ? "Dosya yüklenemedi. Tekrar deneyin veya daha küçük bir PDF/resim seçin."
+              : searchParams.error === "message-save"
+                ? "Mesaj kaydedilemedi. Lütfen tekrar deneyin."
+                : searchParams.error === "question-create"
+                  ? "Soru oluşturulamadı. Lütfen tekrar deneyin."
+                  : "Konu başlığı ve mesaj veya dosya eki gereklidir."}
+        </p>
+      )}
+
       <form action={createQuestion} className="card mt-6">
         <div className="flex items-center gap-2 font-semibold text-slate-900">
           <Plus className="h-5 w-5 text-brand-600" />
@@ -61,7 +79,6 @@ export default async function StudentQuestionsPage() {
           <textarea
             id="question-body"
             name="body"
-            required
             rows={4}
             placeholder="Sorunu veya takıldığın yeri anlat..."
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-100"

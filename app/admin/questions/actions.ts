@@ -64,5 +64,6 @@ export async function sendQuestionReply(formData: FormData) {
   });
 
   revalidatePath("/admin/questions");
+  revalidatePath(`/admin/questions/${questionId}`);
   revalidatePath("/student/questions");
 }

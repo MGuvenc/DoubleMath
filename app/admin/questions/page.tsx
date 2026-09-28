@@ -1,4 +1,5 @@
 import { createAdminClient, createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { FileText, MessageCircle, Send } from "lucide-react";
 import { sendQuestionReply, updateQuestionStatus } from "./actions";
 
@@ -50,7 +51,12 @@ export default async function AdminQuestionsPage() {
                     <MessageCircle className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">{question.title}</p>
+                    <Link
+                      href={`/admin/questions/${question.id}`}
+                      className="font-semibold text-slate-900 hover:text-brand-700"
+                    >
+                      {question.title}
+                    </Link>
                     <p className="mt-1 text-xs text-slate-500">
                       {question.profiles?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
                     </p>
