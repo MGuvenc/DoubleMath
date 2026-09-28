@@ -9,7 +9,7 @@ const SITE_DESCRIPTION =
   "Deneyimli matematik öğretmeninden birebir online özel ders. LGS, YKS ve okul müfredatına yönelik profesyonel matematik desteği.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://doublemath.vercel.app/students"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://doublematematik.vercel.app"),
   title: {
     default: `${SITE_NAME} | Online Birebir Matematik Dersi`,
     template: `%s | ${SITE_NAME}`,

@@ -19,7 +19,7 @@ export default function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <Link href="/" className="text-lg font-bold text-brand-700" onClick={() => setOpen(false)}>
-          Matematik Özel Ders
+          Double Matematik
         </Link>
 
         <nav className="hidden gap-6 sm:flex">
