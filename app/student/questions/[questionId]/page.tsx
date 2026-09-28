@@ -21,7 +21,7 @@ export default async function StudentQuestionConversationPage({
 
   const { data: question } = await supabase
     .from("questions")
-    .select("id, title, status, created_at")
+    .select("id, title, created_at")
     .eq("id", params.questionId)
     .eq("student_id", user.id)
     .maybeSingle();
@@ -72,9 +72,7 @@ export default async function StudentQuestionConversationPage({
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold text-slate-900">{question.title}</h1>
             <p className="mt-1 text-sm text-slate-500">
-              {question.status === "closed" ? "Kapalı" : question.status === "answered" ? "Cevaplandı" : "Açık"}
-              {" · "}
-              {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
+              Açık konuşma · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
             </p>
           </div>
         </div>

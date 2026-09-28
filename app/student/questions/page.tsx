@@ -130,20 +130,8 @@ export default async function StudentQuestionsPage({
                 </div>
               </div>
 
-              <span
-                className={
-                  question.status === "open"
-                    ? "inline-flex rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700"
-                    : question.status === "answered"
-                      ? "inline-flex rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
-                      : "inline-flex rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700"
-                }
-              >
-                {question.status === "open"
-                  ? "Açık"
-                  : question.status === "answered"
-                    ? "Cevaplandı"
-                    : "Kapandı"}
+              <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+                Açık
               </span>
             </div>
 

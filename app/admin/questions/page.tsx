@@ -7,7 +7,7 @@ export default async function AdminQuestionsPage() {
 
   const { data: questions } = await supabase
     .from("questions")
-    .select("id, title, status, student_id, created_at, profiles(full_name), question_messages(body, attachment_url, created_at)")
+    .select("id, title, student_id, created_at, profiles(full_name, email), question_messages(body, attachment_url, created_at)")
     .order("created_at", { ascending: false });
 
   return (
@@ -39,20 +39,15 @@ export default async function AdminQuestionsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-semibold text-slate-900 group-hover:text-brand-700">{question.title}</h2>
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                        question.status === "open"
-                          ? "bg-amber-50 text-amber-700"
-                          : question.status === "answered"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {question.status === "open" ? "Açık" : question.status === "answered" ? "Cevaplandı" : "Kapandı"}
+                    <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      Açık
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">
-                    {question.profiles?.[0]?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
+                    {question.profiles?.[0]?.full_name || "Öğrenci"}
+                    {question.profiles?.[0]?.email ? ` · ${question.profiles[0].email}` : ""}
+                    {" · "}
+                    {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                   <p className="mt-2 truncate text-sm text-slate-600">
                     {latestMessage?.body || "Henüz mesaj yok."}
