@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -48,6 +48,17 @@ export default function AdminSidebar({ adminName, unreadCounts }: { adminName: s
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const refreshCounts = () => router.refresh();
+    const intervalId = window.setInterval(refreshCounts, 15000);
+    window.addEventListener("focus", refreshCounts);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshCounts);
+    };
+  }, [router]);
 
   async function handleLogout() {
     const supabase = createClient();

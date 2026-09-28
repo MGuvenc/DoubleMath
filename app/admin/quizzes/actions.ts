@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export type QuizActionResult = { error: string } | { success: true };
@@ -140,6 +140,13 @@ export async function deleteQuestion(quizId: string, questionId: string): Promis
 
 export async function togglePublish(quizId: string, publish: boolean): Promise<QuizActionResult> {
   const supabase = createClient();
+  const { data: quiz } = await supabase
+    .from("quizzes")
+    .select("title, is_published")
+    .eq("id", quizId)
+    .single<{ title: string; is_published: boolean }>();
+
+  if (!quiz) return { error: "Sınav bulunamadı." };
 
   if (publish) {
     // Soru olmadan yayınlamayı engelle
@@ -155,6 +162,30 @@ export async function togglePublish(quizId: string, publish: boolean): Promise<Q
 
   const { error } = await supabase.from("quizzes").update({ is_published: publish }).eq("id", quizId);
   if (error) return { error: `Durum güncellenemedi: ${error.message}` };
+
+  if (publish && !quiz.is_published) {
+    const adminSupabase = createAdminClient();
+    const { data: students } = await adminSupabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "student")
+      .eq("is_active", true)
+      .returns<{ id: string }[]>();
+
+    if (students?.length) {
+      const { error: notificationError } = await adminSupabase.from("notifications").insert(
+        students.map((student) => ({
+          recipient_id: student.id,
+          channel: "in_app" as const,
+          title: "Yeni sınav yayınlandı",
+          body: `"${quiz.title}" sınavı çözülmeye hazır.`,
+          link: "/student/quizzes",
+        }))
+      );
+      if (notificationError) console.error("Sınav bildirimi gönderilemedi:", notificationError);
+    }
+  }
+
   revalidatePath(`/admin/quizzes/${quizId}`);
   revalidatePath("/admin/quizzes");
   revalidatePath("/student/quizzes");

@@ -60,6 +60,27 @@ export async function createMaterial(formData: FormData): Promise<MaterialAction
     await supabase.from("materials").update({ file_path: path }).eq("id", material.id);
   }
 
+  const adminSupabase = createAdminClient();
+  const { data: students } = await adminSupabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "student")
+    .eq("is_active", true)
+    .returns<{ id: string }[]>();
+
+  if (students?.length) {
+    const { error: notificationError } = await adminSupabase.from("notifications").insert(
+      students.map((student) => ({
+        recipient_id: student.id,
+        channel: "in_app" as const,
+        title: "Yeni kaynak eklendi",
+        body: `"${title}" adlı yeni kaynak paylaşılmıştır.`,
+        link: "/student/materials",
+      }))
+    );
+    if (notificationError) console.error("Kaynak bildirimi gönderilemedi:", notificationError);
+  }
+
   revalidatePath("/admin/materials");
   revalidatePath("/student/materials");
   return { success: true };

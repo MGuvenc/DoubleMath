@@ -159,6 +159,30 @@ export async function finishAttempt(attemptId: string): Promise<FinishAttemptRes
     return { error: "Sınav sonuçlandırılamadı." };
   }
 
+  const { data: quiz } = await adminSupabase
+    .from("quizzes")
+    .select("title")
+    .eq("id", attempt.quiz_id)
+    .single<{ title: string }>();
+  const { data: admins } = await adminSupabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+    .returns<{ id: string }[]>();
+
+  if (admins?.length) {
+    const { error: notificationError } = await adminSupabase.from("notifications").insert(
+      admins.map((admin) => ({
+        recipient_id: admin.id,
+        channel: "in_app" as const,
+        title: "Sınav tamamlandı",
+        body: `Bir öğrenci "${quiz?.title || "Sınav"}" sınavını tamamladı.`,
+        link: "/admin/quizzes",
+      }))
+    );
+    if (notificationError) console.error("Sınav sonucu bildirimi gönderilemedi:", notificationError);
+  }
+
   revalidatePath("/student/quizzes");
   revalidatePath(`/student/quizzes/${attempt.quiz_id}`);
   revalidatePath(`/admin/quizzes/${attempt.quiz_id}`);

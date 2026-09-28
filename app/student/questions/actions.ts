@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function createQuestion(formData: FormData) {
@@ -26,10 +26,11 @@ export async function createQuestion(formData: FormData) {
 
   if (error || !question) return;
 
-  const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
+  const adminSupabase = createAdminClient();
+  const { data: admins } = await adminSupabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
 
   if (admins?.length) {
-    await supabase.from("notifications").insert(
+    await adminSupabase.from("notifications").insert(
       admins.map((admin) => ({
         recipient_id: admin.id,
         channel: "in_app",
@@ -71,10 +72,11 @@ export async function replyToQuestion(formData: FormData) {
 
   if (error) return;
 
-  const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
+  const adminSupabase = createAdminClient();
+  const { data: admins } = await adminSupabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
 
   if (admins?.length) {
-    await supabase.from("notifications").insert(
+    await adminSupabase.from("notifications").insert(
       admins.map((admin) => ({
         recipient_id: admin.id,
         channel: "in_app",

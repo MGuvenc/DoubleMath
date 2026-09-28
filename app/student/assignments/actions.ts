@@ -31,9 +31,9 @@ export async function submitAssignment(
 
   const { data: assignment } = await supabase
     .from("assignments")
-    .select("due_at")
+    .select("title, due_at")
     .eq("id", assignmentId)
-    .single<{ due_at: string }>();
+    .single<{ title: string; due_at: string }>();
 
   const isLate = assignment ? new Date() > new Date(assignment.due_at) : false;
 
@@ -62,6 +62,25 @@ export async function submitAssignment(
   if (updateError) {
     console.error("Teslim kaydedilemedi:", updateError);
     return { error: "Teslim kaydedilemedi." };
+  }
+
+  const { data: admins } = await adminSupabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+    .returns<{ id: string }[]>();
+
+  if (admins?.length) {
+    const { error: notificationError } = await adminSupabase.from("notifications").insert(
+      admins.map((admin) => ({
+        recipient_id: admin.id,
+        channel: "in_app" as const,
+        title: "Ödev teslim edildi",
+        body: `Bir öğrenci "${assignment?.title || "Ödev"}" ödevini teslim etti.`,
+        link: "/admin/assignments",
+      }))
+    );
+    if (notificationError) console.error("Ödev teslim bildirimi gönderilemedi:", notificationError);
   }
 
   revalidatePath("/student/assignments");
