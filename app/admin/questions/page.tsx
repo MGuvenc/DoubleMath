@@ -1,14 +1,31 @@
-import { createClient } from "@/lib/supabase/server";
-import { MessageCircle, Send } from "lucide-react";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { FileText, MessageCircle, Send } from "lucide-react";
 import { sendQuestionReply, updateQuestionStatus } from "./actions";
 
 export default async function AdminQuestionsPage() {
   const supabase = createClient();
+  const adminSupabase = createAdminClient();
 
   const { data: questions } = await supabase
     .from("questions")
     .select("*, profiles(full_name), question_messages(*, profiles!question_messages_sender_id_fkey(full_name))")
     .order("created_at", { ascending: false });
+
+  const questionsWithAttachments = await Promise.all(
+    (questions || []).map(async (question) => ({
+      ...question,
+      question_messages: await Promise.all(
+        (((question as any).question_messages || []) as any[]).map(async (message) => ({
+          ...message,
+          attachmentSignedUrl: message.attachment_url
+            ? (await adminSupabase.storage
+                .from("question-attachments")
+                .createSignedUrl(message.attachment_url, 3600)).data?.signedUrl || null
+            : null,
+        }))
+      ),
+    }))
+  );
 
   return (
     <div>
@@ -16,11 +33,11 @@ export default async function AdminQuestionsPage() {
       <p className="mt-1 text-sm text-slate-500">Öğrenci sorularını takip edip durumu güncelle.</p>
 
       <div className="mt-6 space-y-4">
-        {(questions || []).length === 0 && (
+        {questionsWithAttachments.length === 0 && (
           <div className="card text-center text-sm text-slate-400">Henüz soru gelmemiş.</div>
         )}
 
-        {(questions || []).map((question) => {
+        {questionsWithAttachments.map((question) => {
           const messages = [...((question as any).question_messages || [])].sort(
             (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           );
@@ -82,6 +99,29 @@ export default async function AdminQuestionsPage() {
                         </span>
                       </div>
                       <p className="whitespace-pre-wrap text-slate-700">{message.body}</p>
+                      {message.attachmentSignedUrl && (
+                        <div className="mt-3">
+                          {/\.(jpe?g|png|webp)$/i.test(message.attachment_url || "") ? (
+                            <a href={message.attachmentSignedUrl} target="_blank" rel="noreferrer">
+                              <img
+                                src={message.attachmentSignedUrl}
+                                alt="Öğrencinin eklediği görsel"
+                                className="max-h-72 max-w-full rounded-lg border border-slate-200 object-contain"
+                              />
+                            </a>
+                          ) : (
+                            <a
+                              href={message.attachmentSignedUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 text-sm font-medium text-brand-700 hover:underline"
+                            >
+                              <FileText className="h-4 w-4" />
+                              Ekli PDF/dosyayı aç
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

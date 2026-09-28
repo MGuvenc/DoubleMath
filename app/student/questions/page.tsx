@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { MessageCircle, Plus } from "lucide-react";
+import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { createQuestion } from "./actions";
 
 export default async function StudentQuestionsPage() {
@@ -52,6 +54,31 @@ export default async function StudentQuestionsPage() {
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-100"
           />
         </div>
+        <div className="mt-4">
+          <label htmlFor="question-body" className="mb-2 block text-sm font-medium text-slate-700">
+            Mesajın
+          </label>
+          <textarea
+            id="question-body"
+            name="body"
+            required
+            rows={4}
+            placeholder="Sorunu veya takıldığın yeri anlat..."
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-100"
+          />
+        </div>
+        <div className="mt-4">
+          <label htmlFor="question-attachment" className="mb-2 block text-sm font-medium text-slate-700">
+            Dosya eki (PDF veya resim, en fazla 10 MB)
+          </label>
+          <input
+            id="question-attachment"
+            name="attachment"
+            type="file"
+            accept={STUDENT_ACCEPT_ATTR}
+            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+          />
+        </div>
         <button type="submit" className="btn-primary mt-4">
           Soruyu Gönder
         </button>
@@ -65,7 +92,11 @@ export default async function StudentQuestionsPage() {
         )}
 
         {normalizedQuestions.map((question) => (
-          <div key={question.id} className="card">
+          <Link
+            key={question.id}
+            href={`/student/questions/${question.id}`}
+            className="card block transition hover:border-brand-300 hover:shadow-sm"
+          >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-brand-50 p-2 text-brand-600">
@@ -100,7 +131,7 @@ export default async function StudentQuestionsPage() {
             </div>
 
             <p className="mt-4 text-sm text-slate-600">{question.lastMessage}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

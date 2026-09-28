@@ -60,7 +60,7 @@ export async function sendQuestionReply(formData: FormData) {
     channel: "in_app",
     title: "Öğretmenden cevap geldi",
     body: "Öğretmenin sorunu cevapladı. Mesajı görmek için Öğretmene Sor sayfasına bak.",
-    link: "/student/questions",
+    link: `/student/questions?question_id=${questionId}`,
   });
 
   revalidatePath("/admin/questions");
