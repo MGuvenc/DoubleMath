@@ -19,9 +19,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (profile?.role !== "admin") redirect("/student/dashboard");
 
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_id", user.id)
+    .eq("is_read", false);
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 sm:flex-row">
-      <AdminSidebar adminName={profile.full_name} />
+      <AdminSidebar adminName={profile.full_name} unreadCount={count ?? 0} />
       <main className="flex-1 p-4 sm:p-8">{children}</main>
     </div>
   );

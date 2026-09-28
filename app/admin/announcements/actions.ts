@@ -16,14 +16,38 @@ export async function createAnnouncement(formData: FormData) {
 
   if (!title || !body) return;
 
-  const { error } = await supabase.from("announcements").insert({
-    title,
-    body,
-    created_by: user.id,
-    send_email: false,
-  });
+  const { data: announcement, error } = await supabase
+    .from("announcements")
+    .insert({
+      title,
+      body,
+      created_by: user.id,
+      send_email: false,
+    })
+    .select("id")
+    .single<{ id: string }>();
 
-  if (!error) {
+  if (!error && announcement) {
+    const { data: students } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "student")
+      .eq("is_active", true)
+      .returns<{ id: string }[]>();
+
+    if (students?.length) {
+      await supabase.from("notifications").insert(
+        students.map((student) => ({
+          recipient_id: student.id,
+          channel: "in_app",
+          title: "Yeni duyuru",
+          body: `${title} — ${body.slice(0, 120)}${body.length > 120 ? "..." : ""}`,
+          link: "/student/announcements",
+        }))
+      );
+    }
+
     revalidatePath("/admin/announcements");
+    revalidatePath("/student/announcements");
   }
 }

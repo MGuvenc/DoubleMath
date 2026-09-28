@@ -1,72 +1,110 @@
 import { createClient } from "@/lib/supabase/server";
-import { MessageCircle } from "lucide-react";
-import { updateQuestionStatus } from "./actions";
+import { MessageCircle, Send } from "lucide-react";
+import { sendQuestionReply, updateQuestionStatus } from "./actions";
 
 export default async function AdminQuestionsPage() {
   const supabase = createClient();
 
   const { data: questions } = await supabase
     .from("questions")
-    .select("*, profiles(full_name)")
+    .select("*, profiles(full_name), question_messages(*, profiles!question_messages_sender_id_fkey(full_name))")
     .order("created_at", { ascending: false });
-
-  const { data: messages } = await supabase
-    .from("question_messages")
-    .select("question_id, body, created_at")
-    .order("created_at", { ascending: false });
-
-  const messageMap = new Map<string, string>();
-  for (const message of messages || []) {
-    if (!messageMap.has(message.question_id)) {
-      messageMap.set(message.question_id, message.body);
-    }
-  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-900">Öğretmene Sorular</h1>
       <p className="mt-1 text-sm text-slate-500">Öğrenci sorularını takip edip durumu güncelle.</p>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 space-y-4">
         {(questions || []).length === 0 && (
           <div className="card text-center text-sm text-slate-400">Henüz soru gelmemiş.</div>
         )}
 
-        {(questions || []).map((question) => (
-          <div key={question.id} className="card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-brand-50 p-2 text-brand-600">
-                  <MessageCircle className="h-4 w-4" />
+        {(questions || []).map((question) => {
+          const messages = [...((question as any).question_messages || [])].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+
+          return (
+            <div key={question.id} className="card">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-lg bg-brand-50 p-2 text-brand-600">
+                    <MessageCircle className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{question.title}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {question.profiles?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-slate-900">{question.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {question.profiles?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
-                  </p>
-                </div>
+
+                <form action={updateQuestionStatus} className="flex items-center gap-2">
+                  <input type="hidden" name="question_id" value={question.id} />
+                  <select
+                    name="status"
+                    defaultValue={question.status}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-brand-300"
+                  >
+                    <option value="open">Açık</option>
+                    <option value="answered">Cevaplandı</option>
+                    <option value="closed">Kapandı</option>
+                  </select>
+                  <button type="submit" className="btn-secondary py-2 text-xs">
+                    Güncelle
+                  </button>
+                </form>
               </div>
 
-              <form action={updateQuestionStatus} className="flex items-center gap-2">
+              <div className="mt-4 space-y-3 rounded-xl bg-slate-50 p-3">
+                {messages.length === 0 && (
+                  <p className="text-sm text-slate-500">Henüz mesaj yok.</p>
+                )}
+                {messages.map((message) => {
+                  const senderName = message.profiles?.full_name || "Kullanıcı";
+                  const isTeacher = message.sender_id !== question.student_id;
+
+                  return (
+                    <div
+                      key={message.id}
+                      className={`rounded-lg border p-3 text-sm ${
+                        isTeacher ? "border-brand-200 bg-brand-50" : "border-slate-200 bg-white"
+                      }`}
+                    >
+                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-slate-500">
+                        <span>{senderName}</span>
+                        <span>
+                          {new Date(message.created_at).toLocaleString("tr-TR", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-slate-700">{message.body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <form action={sendQuestionReply} className="mt-4 space-y-2">
                 <input type="hidden" name="question_id" value={question.id} />
-                <select
-                  name="status"
-                  defaultValue={question.status}
-                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-brand-300"
-                >
-                  <option value="open">Açık</option>
-                  <option value="answered">Cevaplandı</option>
-                  <option value="closed">Kapandı</option>
-                </select>
-                <button type="submit" className="btn-secondary py-2 text-xs">
-                  Güncelle
+                <label className="block text-sm font-medium text-slate-700">Cevap yaz</label>
+                <textarea
+                  name="body"
+                  rows={3}
+                  required
+                  placeholder="Öğrenciye cevap yaz..."
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-100"
+                />
+                <button type="submit" className="btn-primary inline-flex items-center gap-2">
+                  <Send className="h-4 w-4" />
+                  Gönder
                 </button>
               </form>
             </div>
-
-            <p className="mt-4 text-sm text-slate-600">{messageMap.get(question.id) || "Henüz öğrenciye gönderilmiş bir mesaj yok."}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

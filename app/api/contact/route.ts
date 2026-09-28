@@ -24,6 +24,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Kayıt sırasında hata oluştu." }, { status: 500 });
   }
 
+  const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin").returns<{ id: string }[]>();
+
+  if (admins?.length) {
+    await supabase.from("notifications").insert(
+      admins.map((admin) => ({
+        recipient_id: admin.id,
+        channel: "in_app",
+        title: "Yeni iletişim talebi",
+        body: `${full_name} iletişim formundan yeni mesaj bıraktı.`,
+        link: "/admin/contact-requests",
+      }))
+    );
+  }
+
   // Admin'e bilgilendirme e-postası (Resend API key tanımlıysa)
   if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
     try {

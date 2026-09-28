@@ -27,9 +27,10 @@ const LINKS = [
   { href: "/student/quizzes", label: "Sınavlar", icon: ClipboardCheck },
   { href: "/student/questions", label: "Öğretmene Sor", icon: MessageCircle },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
+  { href: "/student/notifications", label: "Bildirimler", icon: Bell },
 ];
 
-export default function StudentSidebar({ studentName }: { studentName: string }) {
+export default function StudentSidebar({ studentName, unreadCount }: { studentName: string; unreadCount: number }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function StudentSidebar({ studentName }: { studentName: string })
     <>
       {LINKS.map((l) => {
         const active = pathname === l.href;
+        const showBadge = l.href === "/student/notifications" && unreadCount > 0;
         return (
           <Link
             key={l.href}
@@ -55,7 +57,12 @@ export default function StudentSidebar({ studentName }: { studentName: string })
             }`}
           >
             <l.icon className="h-4 w-4" />
-            {l.label}
+            <span className="flex-1">{l.label}</span>
+            {showBadge && (
+              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -112,6 +119,12 @@ export default function StudentSidebar({ studentName }: { studentName: string })
         <div className="flex-shrink-0 p-4 pb-2">
           <p className="text-xs text-slate-500">Hoş geldin,</p>
           <p className="font-semibold text-slate-900">{studentName}</p>
+          {unreadCount > 0 && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">
+              <Bell className="h-3.5 w-3.5" />
+              {unreadCount} okunmamış bildirim
+            </div>
+          )}
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-2">{navLinks()}</nav>
         <div className="flex-shrink-0 border-t border-slate-200 p-4">

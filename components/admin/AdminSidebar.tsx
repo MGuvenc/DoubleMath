@@ -13,6 +13,7 @@ import {
   ClipboardCheck,
   MessageCircle,
   Megaphone,
+  Bell,
   FileText,
   Newspaper,
   Mail,
@@ -35,15 +36,16 @@ const LINKS = [
   { href: "/admin/quizzes", label: "Sınavlar", icon: ClipboardCheck },
   { href: "/admin/questions", label: "Sorular", icon: MessageCircle },
   { href: "/admin/announcements", label: "Duyurular", icon: Megaphone },
+  { href: "/admin/notifications", label: "Bildirimler", icon: Bell },
   { href: "/admin/pages", label: "Anasayfa (CMS)", icon: FileText },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
-    { href: "/admin/pricing", label: "Ücretlendirme", icon: DollarSign },
+  { href: "/admin/pricing", label: "Ücretlendirme", icon: DollarSign },
   { href: "/admin/discounts", label: "İndirim Kodları", icon: Percent },
   { href: "/admin/orders", label: "Siparişler", icon: ShoppingCart },
   { href: "/admin/settings", label: "Ayarlar", icon: Settings },
 ];
 
-export default function AdminSidebar({ adminName }: { adminName: string }) {
+export default function AdminSidebar({ adminName, unreadCount }: { adminName: string; unreadCount: number }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,6 +61,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
     <>
       {LINKS.map((l) => {
         const active = pathname === l.href;
+        const showBadge = l.href === "/admin/notifications" && unreadCount > 0;
         return (
           <Link
             key={l.href}
@@ -69,7 +72,12 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
             }`}
           >
             <l.icon className="h-4 w-4" />
-            {l.label}
+            <span className="flex-1">{l.label}</span>
+            {showBadge && (
+              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -126,6 +134,12 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
         <div className="flex-shrink-0 p-4 pb-2">
           <p className="text-xs text-slate-500">Admin</p>
           <p className="font-semibold text-slate-900">{adminName}</p>
+          {unreadCount > 0 && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">
+              <Bell className="h-3.5 w-3.5" />
+              {unreadCount} okunmamış bildirim
+            </div>
+          )}
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-2">{navLinks()}</nav>
         <div className="flex-shrink-0 border-t border-slate-200 p-4">
