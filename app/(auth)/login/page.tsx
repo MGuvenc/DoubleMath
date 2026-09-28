@@ -20,7 +20,11 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
-    searchParams.get("error") === "oauth" ? "Google ile giriş başarısız oldu, tekrar dene." : null
+    searchParams.get("error") === "oauth-profile"
+      ? "Google hesabı doğrulandı ancak kullanıcı profili oluşturulamadı. Lütfen yöneticiyle iletişime geç."
+      : searchParams.get("error") === "oauth"
+        ? "Google ile giriş başarısız oldu. Supabase Google sağlayıcı ayarlarını kontrol et."
+        : null
   );
   const [loading, setLoading] = useState(false);
 

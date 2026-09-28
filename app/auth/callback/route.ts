@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import type { ProfileRoleRow } from "@/lib/supabase/query-types";
 
 // Google (veya ileride eklenecek başka OAuth sağlayıcıları) girişinden sonra
@@ -16,6 +16,30 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
+      const email = data.user.email;
+      if (!email) return NextResponse.redirect(`${origin}/login?error=oauth`);
+
+      const metadataName = data.user.user_metadata?.full_name || data.user.user_metadata?.name;
+      const fullName = typeof metadataName === "string" && metadataName.trim()
+        ? metadataName.trim()
+        : email.split("@")[0];
+
+      const adminSupabase = createAdminClient();
+      const { error: profileUpsertError } = await adminSupabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          full_name: fullName,
+          email,
+          role: "student",
+        },
+        { onConflict: "id", ignoreDuplicates: true }
+      );
+
+      if (profileUpsertError) {
+        console.error("OAuth profili oluşturulamadı:", profileUpsertError);
+        return NextResponse.redirect(`${origin}/login?error=oauth-profile`);
+      }
+
       // Rolüne göre doğru panele yönlendir
       const { data: profile } = await supabase
         .from("profiles")
@@ -23,10 +47,10 @@ export async function GET(request: Request) {
         .eq("id", data.user.id)
         .single<ProfileRoleRow>();
 
-      const target =
-        redirectTo || (profile?.role === "admin" ? "/admin/dashboard" : "/student/dashboard");
+      const safeRedirect = redirectTo?.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : null;
+      const target = safeRedirect || (profile?.role === "admin" ? "/admin/dashboard" : "/student/dashboard");
 
-      return NextResponse.redirect(`${origin}${target}`);
+      return NextResponse.redirect(new URL(target, origin));
     }
   }
 

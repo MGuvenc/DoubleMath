@@ -4,12 +4,12 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-const SITE_NAME = "Matematik Özel Ders";
+const SITE_NAME = "Double Matematik";
 const SITE_DESCRIPTION =
   "Deneyimli matematik öğretmeninden birebir online özel ders. LGS, YKS ve okul müfredatına yönelik profesyonel matematik desteği.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://doublemath.vercel.app/students"),
   title: {
     default: `${SITE_NAME} | Online Birebir Matematik Dersi`,
     template: `%s | ${SITE_NAME}`,
