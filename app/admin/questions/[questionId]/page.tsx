@@ -50,7 +50,7 @@ export default async function AdminQuestionConversationPage({
           <div>
             <h1 className="text-xl font-bold text-slate-900">{question.title}</h1>
             <p className="mt-1 text-sm text-slate-500">
-              {question.profiles?.full_name || "Öğrenci"} ·{" "}
+              {question.profiles?.[0]?.full_name || "Öğrenci"} ·{" "}
               {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
             </p>
           </div>
@@ -86,7 +86,7 @@ export default async function AdminQuestionConversationPage({
               >
                 <div className="mb-2 flex items-center justify-between gap-6 text-xs text-slate-500">
                   <span className="font-semibold">
-                    {isTeacher ? "Öğretmen" : message.profiles?.full_name || "Öğrenci"}
+                    {isTeacher ? "Öğretmen" : message.profiles?.[0]?.full_name || "Öğrenci"}
                   </span>
                   <time>
                     {new Date(message.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}

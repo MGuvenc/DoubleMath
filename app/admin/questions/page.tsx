@@ -52,7 +52,7 @@ export default async function AdminQuestionsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">
-                    {question.profiles?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
+                    {question.profiles?.[0]?.full_name || "Öğrenci"} · {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                   <p className="mt-2 truncate text-sm text-slate-600">
                     {latestMessage?.body || "Henüz mesaj yok."}
