@@ -218,6 +218,28 @@ export interface HomeContentJson {
   cta?: { title: string; subtitle: string };
 }
 
+export interface BlogPostRow {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  content_html: string;
+  status: "draft" | "published";
+  seo_title: string | null;
+  seo_description: string | null;
+  author_id: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+  view_count: number;
+}
+
+export type BlogPostSummary = Pick<
+  BlogPostRow,
+  "id" | "slug" | "title" | "excerpt" | "cover_image_url" | "status" | "published_at" | "view_count"
+>;
+
 export interface InstagramPostRow {
   id: string;
   media_type: string | null;

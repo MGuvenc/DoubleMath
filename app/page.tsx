@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CheckCircle2, Calendar, MessageCircle, TrendingUp, Sparkles } from "lucide-react";
 import SiteHeader from "@/components/marketing/SiteHeader";
 import SiteFooter from "@/components/marketing/SiteFooter";
+import BlogSections from "@/components/marketing/BlogSections";
 import type { Metadata } from "next";
 import type { HomeContentJson } from "@/lib/supabase/query-types";
 
@@ -114,6 +115,8 @@ export default async function HomePage() {
             </ul>
           </div>
         </section>
+
+        <BlogSections />
 
         <section className="mx-auto max-w-4xl px-4 py-20 text-center">
           <h2 className="text-3xl font-bold text-slate-900">{cta.title}</h2>

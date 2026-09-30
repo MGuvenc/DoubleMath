@@ -23,3 +23,41 @@
     @apply mb-1 block text-sm font-medium text-slate-700;
   }
 }
+
+.blog-content h2,
+.blog-editor h2 {
+  @apply mb-4 mt-9 text-2xl font-bold text-slate-900;
+}
+
+.blog-content h3,
+.blog-editor h3 {
+  @apply mb-3 mt-7 text-xl font-semibold text-slate-900;
+}
+
+.blog-content p,
+.blog-editor p {
+  @apply mb-5 leading-8 text-slate-700;
+}
+
+.blog-content ul,
+.blog-editor ul {
+  @apply mb-5 list-disc space-y-2 pl-6 text-slate-700;
+}
+
+.blog-content ol,
+.blog-editor ol {
+  @apply mb-5 list-decimal space-y-2 pl-6 text-slate-700;
+}
+
+.blog-content a,
+.blog-editor a {
+  @apply text-brand-700 underline underline-offset-2;
+}
+
+.blog-editor .tiptap {
+  @apply min-h-72 outline-none;
+}
+
+.blog-content img {
+  @apply my-8 h-auto max-w-full;
+}

@@ -7,3 +7,6 @@ node_modules
 *.log
 .DS_Store
 supabase/migrations
+!supabase/migrations/
+supabase/migrations/*
+!supabase/migrations/0006_blog_views.sql
