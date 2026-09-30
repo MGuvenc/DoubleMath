@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import RouteTransitionFeedback from "@/components/ui/RouteTransitionFeedback";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="tr" className={inter.variable}>
       <body className="font-sans antialiased text-slate-900 bg-white">
+        <RouteTransitionFeedback />
         {children}
       </body>
     </html>
