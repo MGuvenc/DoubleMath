@@ -1,6 +1,7 @@
 import type { BlogPostRow } from "@/lib/supabase/query-types";
 import { saveBlogPost } from "@/app/admin/blog/actions";
 import BlogContentEditor from "./BlogContentEditor";
+import BlogCoverInput from "./BlogCoverInput";
 
 export default function BlogPostForm({ post }: { post: BlogPostRow | null }) {
   return (
@@ -21,8 +22,7 @@ export default function BlogPostForm({ post }: { post: BlogPostRow | null }) {
         <textarea className="input min-h-20" id="post-excerpt" name="excerpt" rows={3} defaultValue={post?.excerpt || ""} />
       </div>
       <div>
-        <label className="label" htmlFor="post-cover">Kapak görseli adresi</label>
-        <input className="input" id="post-cover" name="cover_image_url" type="url" placeholder="https://..." defaultValue={post?.cover_image_url || ""} />
+        <BlogCoverInput key={post?.id || "new-post"} initialUrl={post?.cover_image_url || ""} />
       </div>
       <div>
         <p className="label">Yazı içeriği</p>

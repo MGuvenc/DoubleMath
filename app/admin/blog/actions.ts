@@ -2,8 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/require-admin";
+import { validateFile } from "@/lib/file-validation";
+
+const BLOG_COVER_MAX_SIZE = 5 * 1024 * 1024;
+const BLOG_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const BLOG_COVER_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 function makeSlug(value: string) {
   return value
@@ -29,11 +38,16 @@ export async function saveBlogPost(formData: FormData) {
   const title = String(formData.get("title") || "").trim();
   const slug = makeSlug(String(formData.get("slug") || title)).slice(0, 160);
   const excerpt = String(formData.get("excerpt") || "").trim() || null;
-  const coverImageUrl = String(formData.get("cover_image_url") || "").trim() || null;
+  let coverImageUrl = String(formData.get("cover_image_url") || "").trim() || null;
+  const coverFile = formData.get("cover_image_file") as File | null;
   const contentHtml = String(formData.get("content_html") || "").trim();
   const status = formData.get("status") === "published" ? "published" : "draft";
 
   if (!title || !slug || !contentHtml) finishWithError("Başlık ve içerik zorunludur.");
+  if (coverFile?.size) {
+    const validation = validateFile(coverFile, BLOG_COVER_MAX_SIZE, BLOG_COVER_TYPES, "5MB");
+    if (!validation.valid) finishWithError(validation.error || "Kapak görseli geçersiz.");
+  }
 
   let publishedAt: string | null = null;
   if (status === "published") {
@@ -60,11 +74,30 @@ export async function saveBlogPost(formData: FormData) {
     seo_description: String(formData.get("seo_description") || "").trim() || null,
   };
 
-  const { error } = id
-    ? await supabase.from("blog_posts").update(post).eq("id", id)
-    : await supabase.from("blog_posts").insert({ ...post, author_id: guard.userId });
+  let uploadedCoverPath: string | null = null;
+  if (coverFile?.size) {
+    const adminSupabase = createAdminClient();
+    uploadedCoverPath = `${crypto.randomUUID()}.${BLOG_COVER_EXTENSIONS[coverFile.type]}`;
+    const { error: uploadError } = await adminSupabase.storage
+      .from("blog-covers")
+      .upload(uploadedCoverPath, coverFile, { contentType: coverFile.type, upsert: false });
 
-  if (error) finishWithError(error.code === "23505" ? "Bu yazı adresi zaten kullanılıyor." : "Yazı kaydedilemedi.");
+    if (uploadError) finishWithError("Kapak görseli yüklenemedi.");
+    coverImageUrl = adminSupabase.storage.from("blog-covers").getPublicUrl(uploadedCoverPath).data.publicUrl;
+  }
+
+  const postWithCover = { ...post, cover_image_url: coverImageUrl };
+
+  const { error } = id
+    ? await supabase.from("blog_posts").update(postWithCover).eq("id", id)
+    : await supabase.from("blog_posts").insert({ ...postWithCover, author_id: guard.userId });
+
+  if (error) {
+    if (uploadedCoverPath) {
+      await createAdminClient().storage.from("blog-covers").remove([uploadedCoverPath]);
+    }
+    finishWithError(error.code === "23505" ? "Bu yazı adresi zaten kullanılıyor." : "Yazı kaydedilemedi.");
+  }
 
   revalidatePath("/");
   revalidatePath("/blog");
