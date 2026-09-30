@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Bell } from "lucide-react";
 import { createAnnouncement } from "./actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function AdminAnnouncementsPage() {
   const supabase = createClient();
@@ -47,9 +48,9 @@ export default async function AdminAnnouncementsPage() {
           </div>
         </div>
 
-        <button type="submit" className="btn-primary mt-4">
+        <MathSubmitButton className="btn-primary mt-4" pendingText="Duyuru yayınlanıyor...">
           Duyuruyu Yayınla
-        </button>
+        </MathSubmitButton>
       </form>
 
       <div className="mt-8 space-y-3">

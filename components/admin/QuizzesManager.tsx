@@ -8,6 +8,7 @@ import { tr } from "date-fns/locale";
 import { Plus, ClipboardCheck } from "lucide-react";
 import { createQuiz } from "@/app/admin/quizzes/actions";
 import type { QuizRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function QuizzesManager({ quizzes }: { quizzes: QuizRow[] }) {
   const router = useRouter();
@@ -72,9 +73,9 @@ export default function QuizzesManager({ quizzes }: { quizzes: QuizRow[] }) {
           </p>
           {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
           <div className="flex gap-3 sm:col-span-2">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Oluşturuluyor..." : "Oluştur ve Soru Eklemeye Başla"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Sınav oluşturuluyor..." className="btn-primary">
+              Oluştur ve Soru Eklemeye Başla
+            </MathSubmitButton>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
               Vazgeç
             </button>

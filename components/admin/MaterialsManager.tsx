@@ -7,6 +7,7 @@ import { tr } from "date-fns/locale";
 import { Plus, FileText, Video, Link2, Trash2 } from "lucide-react";
 import { createMaterial, deleteMaterial } from "@/app/admin/materials/actions";
 import type { MaterialRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const TYPE_ICONS = { pdf: FileText, video: Video, link: Link2 };
 const TYPE_LABELS = { pdf: "PDF", video: "Video", link: "Link" };
@@ -106,9 +107,9 @@ export default function MaterialsManager({ materials }: { materials: MaterialRow
           {formError && <p className="text-sm text-red-600 sm:col-span-2">{formError}</p>}
 
           <div className="flex gap-3 sm:col-span-2">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Ekleniyor..." : "Ekle"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Kaynak ekleniyor..." className="btn-primary">
+              Ekle
+            </MathSubmitButton>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
               Vazgeç
             </button>
@@ -144,9 +145,9 @@ export default function MaterialsManager({ materials }: { materials: MaterialRow
                           Görüntüle
                         </a>
                       )}
-                      <button onClick={() => handleDelete(m.id)} title="Sil">
+                      <MathSubmitButton type="button" onClick={() => handleDelete(m.id)} loading={isPending} pendingText="Kaynak siliniyor..." className="text-slate-400 hover:text-red-600" title="Sil">
                         <Trash2 className="h-4 w-4 text-slate-400 hover:text-red-600" />
-                      </button>
+                      </MathSubmitButton>
                     </div>
                   </div>
                 );

@@ -7,6 +7,7 @@ import { tr } from "date-fns/locale";
 import { Video, CalendarClock } from "lucide-react";
 import { requestReschedule } from "@/app/student/lessons/actions";
 import type { LessonRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   scheduled: { label: "Planlandı", className: "bg-blue-50 text-blue-700" },
@@ -85,9 +86,9 @@ export default function UpcomingLessonCard({ lesson }: { lesson: LessonRow }) {
           />
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           <div className="mt-3 flex gap-2">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Gönderiliyor..." : "Talebi Gönder"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Erteleme talebi gönderiliyor..." className="btn-primary">
+              Talebi Gönder
+            </MathSubmitButton>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
               Vazgeç
             </button>

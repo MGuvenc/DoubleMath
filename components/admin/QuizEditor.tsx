@@ -13,6 +13,7 @@ import {
   updateQuizAvailability,
 } from "@/app/admin/quizzes/actions";
 import type { QuizRow, QuizQuestionRow, QuizAttemptWithStudentRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 function isoToTurkeyDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
@@ -124,17 +125,20 @@ export default function QuizEditor({
         </div>
         <div className="flex flex-shrink-0 flex-col items-end gap-2">
           <div className="flex gap-2">
-            <button
+            <MathSubmitButton
+              type="button"
               onClick={handleTogglePublish}
-              disabled={isPending || (!quiz.is_published && !canPublish)}
+              loading={isPending}
+              pendingText="Yayın durumu güncelleniyor..."
+              disabled={!quiz.is_published && !canPublish}
               title={!canPublish && !quiz.is_published ? "Önce en az bir soru ekle" : undefined}
               className={quiz.is_published ? "btn-secondary" : "btn-primary disabled:opacity-50"}
             >
               {quiz.is_published ? "Yayından Kaldır" : "Yayınla"}
-            </button>
-            <button onClick={handleDeleteQuiz} className="btn-secondary text-red-600">
+            </MathSubmitButton>
+            <MathSubmitButton type="button" onClick={handleDeleteQuiz} loading={isPending} pendingText="Sınav siliniyor..." className="btn-secondary text-red-600">
               Sınavı Sil
-            </button>
+            </MathSubmitButton>
           </div>
           {publishError && <p className="text-xs text-red-600">{publishError}</p>}
         </div>
@@ -182,9 +186,9 @@ export default function QuizEditor({
             <p className="text-sm text-red-600 sm:col-span-3">{availabilityError}</p>
           )}
           <div className="sm:col-span-3">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Kaydediliyor..." : "Kaydet"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Sınav ayarları kaydediliyor..." className="btn-primary">
+              Kaydet
+            </MathSubmitButton>
           </div>
         </form>
       )}
@@ -198,9 +202,9 @@ export default function QuizEditor({
                 <p className="font-medium text-slate-900">
                   {qIndex + 1}. {q.question_text}
                 </p>
-                <button onClick={() => handleDeleteQuestion(q.id)} title="Soruyu Sil" className="flex-shrink-0">
+                <MathSubmitButton type="button" onClick={() => handleDeleteQuestion(q.id)} loading={isPending} pendingText="Soru siliniyor..." title="Soruyu Sil" aria-label="Soruyu Sil" className="flex-shrink-0">
                   <Trash2 className="h-4 w-4 text-slate-400 hover:text-red-600" />
-                </button>
+                </MathSubmitButton>
               </div>
               <ul className="mt-3 space-y-1.5">
                 {q.quiz_options.map((opt) => (
@@ -247,9 +251,9 @@ export default function QuizEditor({
             ))}
           </div>
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-          <button type="submit" disabled={isPending} className="btn-primary mt-4 inline-flex items-center gap-2">
-            <Plus className="h-4 w-4" /> {isPending ? "Ekleniyor..." : "Soruyu Ekle"}
-          </button>
+          <MathSubmitButton type="submit" loading={isPending} pendingText="Soru ekleniyor..." className="btn-primary mt-4 inline-flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Soruyu Ekle
+          </MathSubmitButton>
         </form>
       </div>
 

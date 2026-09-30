@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function GoogleAuthButton() {
   const searchParams = useSearchParams();
@@ -32,11 +33,12 @@ export default function GoogleAuthButton() {
 
   return (
     <div>
-      <button
+      <MathSubmitButton
         type="button"
         onClick={handleGoogleLogin}
-        disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
+        loading={loading}
+        pendingText="Google'a yönlendiriliyorsun..."
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -56,8 +58,8 @@ export default function GoogleAuthButton() {
             d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.29 0 3.24 2.7 1.27 6.62l4 3.1C6.22 6.88 8.87 4.77 12 4.77z"
           />
         </svg>
-        {loading ? "Yönlendiriliyor..." : "Google ile devam et"}
-      </button>
+        Google ile devam et
+      </MathSubmitButton>
       {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );

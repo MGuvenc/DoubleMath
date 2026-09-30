@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, EyeOff, Eye } from "lucide-react";
 import { createProduct, updateProduct, toggleProductActive, deleteProduct } from "@/app/admin/pricing/actions";
 import type { ProductRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const UNIT_LABELS: Record<string, string> = {
   hourly: "/saat",
@@ -157,9 +158,9 @@ export default function ProductsManager({ products }: { products: ProductRow[] }
           {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
 
           <div className="flex gap-3 sm:col-span-2">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Kaydediliyor..." : editing ? "Güncelle" : "Oluştur"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Ürün kaydediliyor..." className="btn-primary">
+              {editing ? "Güncelle" : "Oluştur"}
+            </MathSubmitButton>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
               Vazgeç
             </button>
@@ -194,16 +195,16 @@ export default function ProductsManager({ products }: { products: ProductRow[] }
                 <button onClick={() => openEdit(p)} title="Düzenle">
                   <Pencil className="h-4 w-4 text-slate-400 hover:text-brand-600" />
                 </button>
-                <button onClick={() => handleToggleActive(p)} title={p.is_active ? "Pasifleştir" : "Aktifleştir"}>
+                <MathSubmitButton type="button" onClick={() => handleToggleActive(p)} loading={isPending} pendingText="Ürün durumu güncelleniyor..." className="text-slate-400" title={p.is_active ? "Pasifleştir" : "Aktifleştir"}>
                   {p.is_active ? (
                     <EyeOff className="h-4 w-4 text-slate-400 hover:text-amber-600" />
                   ) : (
                     <Eye className="h-4 w-4 text-slate-400 hover:text-green-600" />
                   )}
-                </button>
-                <button onClick={() => handleDelete(p.id)} title="Sil">
+                </MathSubmitButton>
+                <MathSubmitButton type="button" onClick={() => handleDelete(p.id)} loading={isPending} pendingText="Ürün siliniyor..." className="text-slate-400" title="Sil">
                   <Trash2 className="h-4 w-4 text-slate-400 hover:text-red-600" />
-                </button>
+                </MathSubmitButton>
               </div>
             </div>
           </div>

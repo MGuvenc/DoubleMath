@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw, Save } from "lucide-react";
 import { saveInstagramSettings, syncInstagramPosts } from "@/app/admin/settings/actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function InstagramSettingsForm({
   initialAccessToken,
@@ -77,23 +78,24 @@ export default function InstagramSettingsForm({
             {saveMessage}
           </p>
         )}
-        <button type="submit" disabled={isSaving} className="btn-primary inline-flex items-center gap-2">
-          <Save className="h-4 w-4" /> {isSaving ? "Kaydediliyor..." : "Kaydet"}
-        </button>
+        <MathSubmitButton type="submit" loading={isSaving} pendingText="Ayarlar kaydediliyor..." className="btn-primary inline-flex items-center gap-2">
+          <Save className="h-4 w-4" /> Kaydet
+        </MathSubmitButton>
       </form>
 
       <div className="card">
         <p className="text-sm text-slate-600">
           Önbellekte <strong>{lastSyncCount}</strong> gönderi var.
         </p>
-        <button
+        <MathSubmitButton
+          type="button"
           onClick={handleSync}
-          disabled={isSyncing}
+          loading={isSyncing}
+          pendingText="Instagram gönderileri eşitleniyor..."
           className="btn-secondary mt-3 inline-flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Senkronize ediliyor..." : "Şimdi Senkronize Et"}
-        </button>
+          <RefreshCw className="h-4 w-4" /> Şimdi Senkronize Et
+        </MathSubmitButton>
         {syncMessage && (
           <p className={`mt-2 text-sm ${syncMessage.includes("hata") ? "text-red-600" : "text-slate-600"}`}>
             {syncMessage}

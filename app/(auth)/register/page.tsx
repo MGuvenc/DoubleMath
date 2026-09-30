@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import GoogleAuthButton from "@/components/marketing/GoogleAuthButton";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function RegisterPage() {
   return (
@@ -115,9 +116,9 @@ function RegisterForm() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? "Kaydediliyor..." : "Kayıt Ol"}
-          </button>
+          <MathSubmitButton type="submit" loading={loading} pendingText="Hesap oluşturuluyor..." className="btn-primary w-full">
+            Kayıt Ol
+          </MathSubmitButton>
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-600">

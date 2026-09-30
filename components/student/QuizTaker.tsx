@@ -4,6 +4,8 @@ import { useState, useEffect, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { saveAnswer, finishAttempt } from "@/app/student/quizzes/actions";
 import type { QuizQuestionForStudent } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
+import { MathLoadingIndicator } from "@/components/ui/MathSubmitButton";
 
 export default function QuizTaker({
   quizTitle,
@@ -21,7 +23,7 @@ export default function QuizTaker({
   initialAnswers: { question_id: string; selected_option_id: string | null }[];
 }) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const [isSavingAnswer, startTransition] = useTransition();
   const [isFinishing, setIsFinishing] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>(
     Object.fromEntries(
@@ -86,6 +88,9 @@ export default function QuizTaker({
       <p className="mt-1 text-sm text-slate-500">
         {answeredCount}/{questions.length} soru cevaplandı
       </p>
+      {isSavingAnswer && !isFinishing && (
+        <MathLoadingIndicator label="Cevabın kaydediliyor..." className="mt-2 text-sm text-slate-600" />
+      )}
 
       <div className="mt-6 space-y-4">
         {questions.map((q, i) => (
@@ -117,9 +122,9 @@ export default function QuizTaker({
         ))}
       </div>
 
-      <button onClick={handleFinish} disabled={isFinishing || finished} className="btn-primary mt-6">
-        {isFinishing ? "Gönderiliyor..." : "Sınavı Bitir"}
-      </button>
+      <MathSubmitButton type="button" onClick={handleFinish} loading={isFinishing} disabled={finished} pendingText="Cevapların gönderiliyor..." className="btn-primary mt-6">
+        {finished ? "Sınav Tamamlandı" : "Sınavı Bitir"}
+      </MathSubmitButton>
     </div>
   );
 }

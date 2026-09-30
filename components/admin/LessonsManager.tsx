@@ -7,6 +7,7 @@ import { tr } from "date-fns/locale";
 import { Plus, Pencil, XCircle, ExternalLink } from "lucide-react";
 import { createLesson, updateLesson, cancelLesson, dismissRescheduleRequest } from "@/app/admin/lessons/actions";
 import type { LessonWithStudentRow, StudentOption } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   scheduled: { label: "Planlandı", className: "bg-blue-50 text-blue-700" },
@@ -197,9 +198,9 @@ export default function LessonsManager({
             {formError && <p className="text-sm text-red-600 sm:col-span-2">{formError}</p>}
 
             <div className="flex gap-3 sm:col-span-2">
-              <button type="submit" disabled={isPending} className="btn-primary">
-                {isPending ? "Kaydediliyor..." : editingLesson ? "Güncelle" : "Oluştur"}
-              </button>
+              <MathSubmitButton type="submit" loading={isPending} pendingText="Ders kaydediliyor..." className="btn-primary">
+                {editingLesson ? "Güncelle" : "Oluştur"}
+              </MathSubmitButton>
               <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
                 Vazgeç
               </button>
@@ -261,22 +262,25 @@ export default function LessonsManager({
                         </a>
                       )}
                       {lesson.status === "reschedule_requested" && (
-                        <button
+                        <MathSubmitButton
+                          type="button"
                           onClick={() => handleDismissRequest(lesson.id)}
+                          loading={isPending}
+                          pendingText="Talep işleniyor..."
                           className="text-xs font-medium text-slate-500 hover:text-brand-600"
                           title="Talebi reddet, dersi orijinal saatinde tut"
                         >
                           Talebi Reddet
-                        </button>
+                        </MathSubmitButton>
                       )}
                       {(lesson.status === "scheduled" || lesson.status === "reschedule_requested") && (
                         <>
                           <button onClick={() => openEditForm(lesson)} title="Düzenle / Yeni Saate Al">
                             <Pencil className="h-4 w-4 text-slate-400 hover:text-brand-600" />
                           </button>
-                          <button onClick={() => handleCancel(lesson.id)} title="İptal Et">
+                          <MathSubmitButton type="button" onClick={() => handleCancel(lesson.id)} loading={isPending} pendingText="Ders iptal ediliyor..." className="text-slate-400 hover:text-red-600" title="İptal Et">
                             <XCircle className="h-4 w-4 text-slate-400 hover:text-red-600" />
-                          </button>
+                          </MathSubmitButton>
                         </>
                       )}
                     </div>

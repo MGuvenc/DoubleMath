@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { startQuizAttempt } from "@/app/student/quizzes/actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function StartQuizButton({ quizId }: { quizId: string }) {
   const router = useRouter();
@@ -22,9 +23,9 @@ export default function StartQuizButton({ quizId }: { quizId: string }) {
 
   return (
     <div className="mt-4">
-      <button onClick={handleStart} disabled={isPending} className="btn-primary">
-        {isPending ? "Başlatılıyor..." : "Sınava Başla"}
-      </button>
+      <MathSubmitButton type="button" onClick={handleStart} loading={isPending} pendingText="Sınav hazırlanıyor..." className="btn-primary">
+        Sınava Başla
+      </MathSubmitButton>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );

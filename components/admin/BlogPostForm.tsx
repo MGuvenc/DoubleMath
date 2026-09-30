@@ -2,6 +2,7 @@ import type { BlogPostRow } from "@/lib/supabase/query-types";
 import { saveBlogPost } from "@/app/admin/blog/actions";
 import BlogContentEditor from "./BlogContentEditor";
 import BlogCoverInput from "./BlogCoverInput";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function BlogPostForm({ post }: { post: BlogPostRow | null }) {
   return (
@@ -46,7 +47,9 @@ export default function BlogPostForm({ post }: { post: BlogPostRow | null }) {
         </div>
       </div>
       <div className="flex flex-wrap gap-3">
-        <button className="btn-primary" type="submit">{post ? "Değişiklikleri Kaydet" : "Yazıyı Kaydet"}</button>
+        <MathSubmitButton className="btn-primary gap-2" pendingText="Yayınlanıyor...">
+          {post ? "Değişiklikleri Kaydet" : "Yazıyı Kaydet"}
+        </MathSubmitButton>
         {post && <a className="btn-secondary" href="/admin/blog">Yeni yazı</a>}
       </div>
     </form>

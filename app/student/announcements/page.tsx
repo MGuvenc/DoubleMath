@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { markAnnouncementAsRead } from "./actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function StudentAnnouncementsPage() {
   const supabase = createClient();
@@ -85,10 +86,10 @@ export default async function StudentAnnouncementsPage() {
               {!isRead && (
                 <form action={markAnnouncementAsRead} className="mt-4">
                   <input type="hidden" name="announcement_id" value={announcement.id} />
-                  <button type="submit" className="inline-flex items-center gap-2 text-sm font-medium text-brand-700 hover:underline">
+                  <MathSubmitButton className="inline-flex items-center gap-2 text-sm font-medium text-brand-700 hover:underline" pendingText="Güncelleniyor...">
                     <CheckCircle2 className="h-4 w-4" />
                     Okundu olarak işaretle
-                  </button>
+                  </MathSubmitButton>
                 </form>
               )}
             </div>

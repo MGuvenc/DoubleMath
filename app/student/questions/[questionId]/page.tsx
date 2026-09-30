@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, MessageCircle, Paperclip, Send } from "lucide-reac
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { replyToQuestion } from "../actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function StudentQuestionConversationPage({
   params,
@@ -157,10 +158,10 @@ export default async function StudentQuestionConversationPage({
             <span>PDF veya resim ekle</span>
             <input type="file" name="attachment" accept={STUDENT_ACCEPT_ATTR} className="max-w-56 text-xs" />
           </label>
-          <button type="submit" className="btn-primary inline-flex items-center justify-center gap-2">
+          <MathSubmitButton className="btn-primary inline-flex items-center justify-center gap-2" pendingText="Yanıt gönderiliyor...">
             <Send className="h-4 w-4" />
             Gönder
-          </button>
+          </MathSubmitButton>
         </div>
         <p className="mt-2 text-xs text-slate-400">PDF, JPG, PNG veya WebP · En fazla 10 MB</p>
       </form>

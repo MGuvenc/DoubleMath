@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { updateHomeContent } from "@/app/admin/pages/actions";
 import type { HomeContentJson } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 interface PageData {
   title: string;
@@ -176,9 +177,9 @@ export default function HomePageEditor({ page }: { page: PageData }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {success && <p className="text-sm text-green-600">Kaydedildi.</p>}
 
-      <button type="submit" disabled={isPending} className="btn-primary">
-        {isPending ? "Kaydediliyor..." : "Kaydet"}
-      </button>
+      <MathSubmitButton type="submit" loading={isPending} pendingText="Anasayfa kaydediliyor..." className="btn-primary">
+        Kaydet
+      </MathSubmitButton>
     </form>
   );
 }

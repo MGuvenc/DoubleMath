@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function ContactForm({ packageName = "" }: { packageName?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -70,9 +71,9 @@ export default function ContactForm({ packageName = "" }: { packageName?: string
         <p className="text-sm text-red-600">Bir hata oluştu, lütfen tekrar deneyin.</p>
       )}
 
-      <button type="submit" disabled={status === "loading"} className="btn-primary w-full">
-        {status === "loading" ? "Gönderiliyor..." : "Gönder"}
-      </button>
+      <MathSubmitButton type="submit" loading={status === "loading"} pendingText="İletişim talebi gönderiliyor..." className="btn-primary w-full">
+        Gönder
+      </MathSubmitButton>
     </form>
   );
 }

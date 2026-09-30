@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Bell, CheckCheck } from "lucide-react";
 import { markNotificationAsRead } from "./actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function StudentNotificationsPage() {
   const supabase = createClient();
@@ -54,10 +55,10 @@ export default async function StudentNotificationsPage() {
               {!notification.is_read && (
                 <form action={markNotificationAsRead}>
                   <input type="hidden" name="notification_id" value={notification.id} />
-                  <button type="submit" className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs font-medium text-brand-700 shadow-sm">
+                  <MathSubmitButton className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs font-medium text-brand-700 shadow-sm" pendingText="Güncelleniyor...">
                     <CheckCheck className="h-3.5 w-3.5" />
                     Okundu
-                  </button>
+                  </MathSubmitButton>
                 </form>
               )}
             </div>

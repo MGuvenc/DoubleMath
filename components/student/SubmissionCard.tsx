@@ -7,6 +7,7 @@ import { tr } from "date-fns/locale";
 import { Paperclip, FileUp, FileCheck } from "lucide-react";
 import { submitAssignment } from "@/app/student/assignments/actions";
 import type { StudentSubmissionRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   pending: { label: "Bekliyor", className: "bg-slate-100 text-slate-600" },
@@ -73,9 +74,9 @@ export default function SubmissionCard({ submission }: { submission: StudentSubm
           <label className="label mt-3">Not (opsiyonel)</label>
           <textarea name="note" rows={2} className="input" placeholder="Öğretmenine iletmek istediğin bir not..." />
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-          <button type="submit" disabled={isPending} className="btn-primary mt-3 inline-flex items-center gap-2">
-            <FileUp className="h-4 w-4" /> {isPending ? "Yükleniyor..." : "Teslim Et"}
-          </button>
+          <MathSubmitButton type="submit" loading={isPending} pendingText="Ödev yükleniyor..." className="btn-primary mt-3 inline-flex items-center gap-2">
+            <FileUp className="h-4 w-4" /> Teslim Et
+          </MathSubmitButton>
         </form>
       ) : (
         <div className="mt-4 border-t border-slate-100 pt-4 text-sm">

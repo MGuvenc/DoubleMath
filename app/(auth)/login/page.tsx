@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import GoogleAuthButton from "@/components/marketing/GoogleAuthButton";
 import type { ProfileRoleRow } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default function LoginPage() {
   return (
@@ -108,9 +109,9 @@ function LoginForm() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-          </button>
+          <MathSubmitButton type="submit" loading={loading} pendingText="Giriş yapılıyor..." className="btn-primary w-full">
+            Giriş Yap
+          </MathSubmitButton>
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-600">

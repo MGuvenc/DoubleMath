@@ -7,6 +7,7 @@ import { tr } from "date-fns/locale";
 import { Plus, Paperclip, ChevronDown, ChevronUp, FileDown } from "lucide-react";
 import { createAssignment, gradeSubmission } from "@/app/admin/assignments/actions";
 import type { AssignmentWithSubmissionsRow, StudentOption } from "@/lib/supabase/query-types";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   pending: { label: "Bekliyor", className: "bg-slate-100 text-slate-600" },
@@ -133,9 +134,9 @@ export default function AssignmentsManager({
           {formError && <p className="text-sm text-red-600 sm:col-span-2">{formError}</p>}
 
           <div className="flex gap-3 sm:col-span-2">
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? "Oluşturuluyor..." : "Ödevi Oluştur"}
-            </button>
+            <MathSubmitButton type="submit" loading={isPending} pendingText="Ödev oluşturuluyor..." className="btn-primary">
+              Ödevi Oluştur
+            </MathSubmitButton>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
               Vazgeç
             </button>
@@ -270,13 +271,15 @@ function SubmissionRow({ submission }: { submission: AssignmentWithSubmissionsRo
               placeholder="Kısa yorum..."
               className="input"
             />
-            <button
+            <MathSubmitButton
+              type="button"
               onClick={handleGrade}
-              disabled={isPending}
+              loading={isPending}
+              pendingText="Not kaydediliyor..."
               className="whitespace-nowrap text-sm font-medium text-brand-600 hover:underline"
             >
               Kaydet
-            </button>
+            </MathSubmitButton>
           </div>
         )}
       </td>

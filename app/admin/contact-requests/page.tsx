@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ContactRequestRow } from "@/lib/supabase/query-types";
 import { updateContactRequestStatus } from "./actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function AdminContactRequestsPage() {
   const supabase = createClient();
@@ -81,9 +82,9 @@ export default async function AdminContactRequestsPage() {
                       <form action={updateContactRequestStatus}>
                         <input type="hidden" name="request_id" value={request.id} />
                         <input type="hidden" name="is_handled" value={String(!request.is_handled)} />
-                        <button type="submit" className="text-left text-xs font-medium text-brand-700 hover:underline">
+                        <MathSubmitButton className="text-left text-xs font-medium text-brand-700 hover:underline" pendingText="Durum güncelleniyor...">
                           {request.is_handled ? "Bekliyor olarak işaretle" : "Dönüş yapıldı olarak işaretle"}
-                        </button>
+                        </MathSubmitButton>
                       </form>
                     </div>
                   </td>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { BlogPostRow, BlogPostSummary } from "@/lib/supabase/query-types";
 import BlogPostForm from "@/components/admin/BlogPostForm";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 import { deleteBlogPost } from "./actions";
 
 export default async function AdminBlogPage({
@@ -56,7 +57,9 @@ export default async function AdminBlogPage({
                   <Link href={`/admin/blog?edit=${post.id}`} className="text-sm font-semibold text-brand-700 hover:text-brand-900">Düzenle</Link>
                   <form action={deleteBlogPost}>
                     <input type="hidden" name="id" value={post.id} />
-                    <button type="submit" className="text-sm font-medium text-rose-700 hover:text-rose-900">Sil</button>
+                    <MathSubmitButton className="inline-flex items-center gap-2 text-sm font-medium text-rose-700 hover:text-rose-900" pendingText="Siliniyor...">
+                      Sil
+                    </MathSubmitButton>
                   </form>
                 </div>
               </article>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MessageCircle, Plus } from "lucide-react";
 import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { createQuestion } from "./actions";
+import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
 export default async function StudentQuestionsPage({
   searchParams,
@@ -96,9 +97,9 @@ export default async function StudentQuestionsPage({
             className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:font-medium file:text-brand-700 hover:file:bg-brand-100"
           />
         </div>
-        <button type="submit" className="btn-primary mt-4">
+        <MathSubmitButton className="btn-primary mt-4" pendingText="Sorun gönderiliyor...">
           Soruyu Gönder
-        </button>
+        </MathSubmitButton>
       </form>
 
       <div className="mt-8 space-y-3">
