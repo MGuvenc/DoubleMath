@@ -2,9 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Copy, Upload } from "lucide-react";
-import { submitBankTransfer } from "@/app/checkout/[productId]/actions";
+import { Check, Copy, Tag, Upload } from "lucide-react";
+import {
+  previewDiscountCode,
+  submitBankTransfer,
+  type DiscountPreviewResult,
+} from "@/app/checkout/[productId]/actions";
 import MathSubmitButton from "@/components/ui/MathSubmitButton";
+
+type AppliedDiscount = Extract<DiscountPreviewResult, { success: true }>;
 
 export default function BankTransferCheckout({
   productId,
@@ -19,13 +25,18 @@ export default function BankTransferCheckout({
 }) {
   const router = useRouter();
   const [isSubmitting, startSubmitting] = useTransition();
+  const [isCheckingDiscount, startCheckingDiscount] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     const formData = new FormData(event.currentTarget);
+    formData.set("discount_code", appliedDiscount?.code || "");
 
     startSubmitting(async () => {
       const result = await submitBankTransfer(productId, formData);
@@ -36,6 +47,25 @@ export default function BankTransferCheckout({
       router.push("/student/packages?orderSubmitted=1");
       router.refresh();
     });
+  }
+
+  function applyDiscount() {
+    setDiscountError(null);
+    setAppliedDiscount(null);
+    startCheckingDiscount(async () => {
+      const result = await previewDiscountCode(productId, discountCode);
+      if ("error" in result) {
+        setDiscountError(result.error);
+        return;
+      }
+      setAppliedDiscount(result);
+    });
+  }
+
+  function handleDiscountCodeChange(value: string) {
+    setDiscountCode(value.toUpperCase());
+    setAppliedDiscount(null);
+    setDiscountError(null);
   }
 
   async function copyIban() {
@@ -80,6 +110,39 @@ export default function BankTransferCheckout({
       </section>
 
       <form onSubmit={handleSubmit} className="card space-y-4">
+        <div>
+          <label className="label" htmlFor="checkout-discount-code">İndirim kodu</label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              id="checkout-discount-code"
+              type="text"
+              autoComplete="off"
+              maxLength={32}
+              value={discountCode}
+              onChange={(event) => handleDiscountCodeChange(event.target.value)}
+              className="input min-w-0 flex-1 uppercase"
+              placeholder="Kodunu gir"
+            />
+            <button
+              type="button"
+              onClick={applyDiscount}
+              disabled={isCheckingDiscount || !discountCode.trim()}
+              className="btn-secondary inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Tag className="h-4 w-4" /> {isCheckingDiscount ? "Kontrol ediliyor..." : "Uygula"}
+            </button>
+          </div>
+          {discountError && <p role="alert" className="mt-2 text-sm text-red-600">{discountError}</p>}
+          {appliedDiscount && (
+            <div role="status" className="mt-3 rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              <p className="font-medium">{appliedDiscount.code} uygulandı.</p>
+              <div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1">
+                <span>İndirim: −{appliedDiscount.discountAmount.toLocaleString("tr-TR")} TL</span>
+                <span className="font-semibold">Ödenecek: {appliedDiscount.finalAmount.toLocaleString("tr-TR")} TL</span>
+              </div>
+            </div>
+          )}
+        </div>
         <div>
           <label className="label" htmlFor="receipt">Havale dekontu</label>
           <input

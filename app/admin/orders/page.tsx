@@ -6,7 +6,7 @@ export default async function AdminOrdersPage() {
   const supabase = createAdminClient();
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, profiles(full_name, email)")
+    .select("*, profiles(full_name, email), discount_codes(code)")
     .order("created_at", { ascending: false })
     .limit(200)
     .returns<AdminOrderRow[]>();

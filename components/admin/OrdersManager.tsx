@@ -71,6 +71,7 @@ export default function OrdersManager({ orders }: { orders: AdminOrderRow[] }) {
                   <td className="py-3 pr-4 text-slate-700">
                     {order.product_name || "Ders paketi"}
                     {order.package_duration_months ? <span className="block text-xs text-slate-500">{order.package_duration_months} ay</span> : null}
+                    {order.discount_codes?.code && <span className="block text-xs text-green-700">Kod: {order.discount_codes.code}</span>}
                   </td>
                   <td className="py-3 pr-4 font-medium text-slate-900">
                     {Number(order.amount).toLocaleString("tr-TR")} {order.currency}

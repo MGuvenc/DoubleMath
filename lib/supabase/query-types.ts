@@ -225,6 +225,19 @@ export interface ProductRow {
   created_at: string;
 }
 
+export interface DiscountCodeRow {
+  id: string;
+  code: string;
+  discount_type: "percent" | "fixed";
+  amount: number;
+  max_uses: number | null;
+  used_count: number;
+  valid_from: string;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface StudentOrderRow {
   id: string;
   product_name: string | null;
@@ -242,6 +255,7 @@ export interface AdminOrderRow extends StudentOrderRow {
   product_id: string;
   receipt_path: string | null;
   profiles: { full_name: string; email: string } | null;
+  discount_codes: { code: string } | null;
   receipt_url?: string | null;
 }
 

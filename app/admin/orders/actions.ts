@@ -43,6 +43,9 @@ export async function approveOrder(orderId: string): Promise<OrderActionResult> 
 
   if (error || !updatedOrder) {
     console.error("Sipariş onaylanamadı:", error);
+    if (error?.message.includes("DISCOUNT_CODE_LIMIT_REACHED")) {
+      return { error: "Bu indirim kodunun kullanım limiti dolmuş. Siparişi ayrıca kontrol et." };
+    }
     return { error: "Sipariş onaylanamadı veya daha önce işlenmiş." };
   }
 
@@ -55,6 +58,7 @@ export async function approveOrder(orderId: string): Promise<OrderActionResult> 
   });
 
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/discounts");
   revalidatePath("/student/packages");
   revalidatePath("/student/dashboard");
   return { success: true };
