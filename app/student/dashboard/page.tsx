@@ -1,15 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Calendar, Clock, ClipboardList, ClipboardCheck } from "lucide-react";
+import { Calendar, Clock, ClipboardList, ClipboardCheck, Package } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import type { LessonRow, SubmissionWithAssignmentRow, QuizRow } from "@/lib/supabase/query-types";
+import type { LessonRow, SubmissionWithAssignmentRow, QuizRow, StudentOrderRow } from "@/lib/supabase/query-types";
 
 export default async function StudentDashboard() {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: packageOrders } = await supabase
+    .from("orders")
+    .select("id, product_name, package_duration_months, amount, currency, status, paid_at, package_expires_at, created_at")
+    .eq("student_id", user!.id)
+    .eq("status", "paid")
+    .order("created_at", { ascending: false })
+    .returns<StudentOrderRow[]>();
+
+  const currentPackage = (packageOrders || []).find(
+    (order) => !order.package_expires_at || new Date(order.package_expires_at).getTime() > Date.now()
+  );
 
   const { data: upcomingLessons } = await supabase
     .from("lessons")
@@ -50,6 +62,26 @@ export default async function StudentDashboard() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-900">Panelim</h1>
+
+      <div className="card mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Package className="h-6 w-6 text-brand-600" />
+          <div>
+            <p className="text-xs text-slate-500">Aktif paketin</p>
+            <p className="font-semibold text-slate-900">
+              {currentPackage?.product_name || "Aktif paket yok"}
+            </p>
+            {currentPackage?.package_expires_at && (
+              <p className="text-sm text-slate-600">
+                {new Date(currentPackage.package_expires_at).toLocaleDateString("tr-TR")} tarihinde sona eriyor
+              </p>
+            )}
+          </div>
+        </div>
+        <Link href="/student/packages" className="text-sm font-medium text-brand-700 hover:underline">
+          Paketlerim
+        </Link>
+      </div>
 
       {nextLesson ? (
         <div className="card mt-6 flex items-center justify-between bg-brand-50">

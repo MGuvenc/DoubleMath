@@ -211,6 +211,26 @@ export interface ProductRow {
   created_at: string;
 }
 
+export interface StudentOrderRow {
+  id: string;
+  product_name: string | null;
+  package_duration_months: number | null;
+  amount: number;
+  currency: string;
+  status: "pending" | "paid" | "failed" | "refunded";
+  paid_at: string | null;
+  package_expires_at: string | null;
+  created_at: string;
+}
+
+export interface AdminOrderRow extends StudentOrderRow {
+  student_id: string | null;
+  product_id: string;
+  receipt_path: string | null;
+  profiles: { full_name: string; email: string } | null;
+  receipt_url?: string | null;
+}
+
 export interface HomeContentJson {
   hero?: { title: string; subtitle: string };
   features?: { title: string; description: string }[];

@@ -77,10 +77,10 @@ export default async function PricingPage() {
                 )}
 
                 <Link
-                  href={`/contact?package=${encodeURIComponent(p.name)}`}
+                  href={`/checkout/${p.id}`}
                   className="btn-primary mt-6 text-center"
                 >
-                  Bu Paketi İste
+                  Paketi Satın Al
                 </Link>
               </div>
             ))}

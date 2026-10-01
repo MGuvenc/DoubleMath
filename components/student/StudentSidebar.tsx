@@ -13,6 +13,7 @@ import {
   BookOpen,
   ClipboardCheck,
   Bell,
+  Package,
   LogOut,
   Menu,
   X,
@@ -26,6 +27,7 @@ const LINKS = [
   { href: "/student/materials", label: "Kaynaklar", icon: BookOpen },
   { href: "/student/quizzes", label: "Sınavlar", icon: ClipboardCheck },
   { href: "/student/questions", label: "Öğretmene Sor", icon: MessageCircle },
+  { href: "/student/packages", label: "Paketlerim", icon: Package },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
 ];
 
