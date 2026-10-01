@@ -6,6 +6,29 @@ import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { sendQuestionReply } from "../actions";
 import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
+type RelatedProfile = { full_name: string; email: string } | { full_name: string; email: string }[] | null;
+
+interface QuestionMessage {
+  id: string;
+  sender_id: string;
+  body: string;
+  attachment_url: string | null;
+  created_at: string;
+  profiles: RelatedProfile;
+}
+
+interface AdminQuestionDetail {
+  id: string;
+  title: string;
+  student_id: string;
+  profiles: RelatedProfile;
+  question_messages: QuestionMessage[];
+}
+
+function getRelatedProfile(profile: RelatedProfile) {
+  return Array.isArray(profile) ? profile[0] : profile;
+}
+
 export default async function AdminQuestionConversationPage({
   params,
   searchParams,
@@ -18,14 +41,14 @@ export default async function AdminQuestionConversationPage({
     .from("questions")
     .select("*, profiles(full_name, email), question_messages(*, profiles!question_messages_sender_id_fkey(full_name, email))")
     .eq("id", params.questionId)
-    .maybeSingle();
+    .maybeSingle<AdminQuestionDetail>();
 
   if (!question) notFound();
 
-  const studentProfile = question.profiles?.[0];
+  const studentProfile = getRelatedProfile(question.profiles);
   const adminSupabase = createAdminClient();
   const messages = await Promise.all(
-    (((question as any).question_messages || []) as any[])
+    (question.question_messages || [])
       .sort((left, right) => new Date(left.created_at).getTime() - new Date(right.created_at).getTime())
       .map(async (message) => ({
         ...message,
@@ -92,7 +115,7 @@ export default async function AdminQuestionConversationPage({
                 <div className="mb-2 flex items-center justify-between gap-6 text-xs text-slate-500">
                   <span className="font-semibold">
                     {isTeacher
-                      ? message.profiles?.[0]?.full_name || "Öğretmen"
+                      ? getRelatedProfile(message.profiles)?.full_name || "Öğretmen"
                       : `${studentProfile?.full_name || "Öğrenci"}${studentProfile?.email ? ` · ${studentProfile.email}` : ""}`}
                   </span>
                   <time>

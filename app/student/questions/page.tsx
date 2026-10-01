@@ -5,6 +5,14 @@ import { STUDENT_ACCEPT_ATTR } from "@/lib/file-validation";
 import { createQuestion } from "./actions";
 import MathSubmitButton from "@/components/ui/MathSubmitButton";
 
+interface StudentQuestionListItem {
+  id: string;
+  title: string;
+  status: "open" | "answered" | "closed";
+  created_at: string;
+  question_messages: { body: string; created_at: string }[];
+}
+
 export default async function StudentQuestionsPage({
   searchParams,
 }: {
@@ -23,10 +31,11 @@ export default async function StudentQuestionsPage({
     .from("questions")
     .select("id, title, status, created_at, question_messages(body, created_at)")
     .eq("student_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .returns<StudentQuestionListItem[]>();
 
   const normalizedQuestions = (questions || []).map((question) => {
-    const messages = [...((question as any).question_messages || [])].sort(
+    const messages = [...(question.question_messages || [])].sort(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 

@@ -2,13 +2,29 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { ChevronRight, MessageCircle, Paperclip } from "lucide-react";
 
+type RelatedProfile = { full_name: string; email: string } | { full_name: string; email: string }[] | null;
+
+interface QuestionListItem {
+  id: string;
+  title: string;
+  student_id: string;
+  created_at: string;
+  profiles: RelatedProfile;
+  question_messages: { body: string; attachment_url: string | null; created_at: string }[];
+}
+
+function getRelatedProfile(profile: RelatedProfile) {
+  return Array.isArray(profile) ? profile[0] : profile;
+}
+
 export default async function AdminQuestionsPage() {
   const supabase = createClient();
 
   const { data: questions } = await supabase
     .from("questions")
     .select("id, title, student_id, created_at, profiles(full_name, email), question_messages(body, attachment_url, created_at)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .returns<QuestionListItem[]>();
 
   return (
     <div>
@@ -21,9 +37,10 @@ export default async function AdminQuestionsPage() {
         )}
 
         {(questions || []).map((question) => {
-          const messages = [...((question as any).question_messages || [])].sort(
+          const messages = [...(question.question_messages || [])].sort(
             (left, right) => new Date(left.created_at).getTime() - new Date(right.created_at).getTime()
           );
+          const studentProfile = getRelatedProfile(question.profiles);
           const latestMessage = messages[messages.length - 1];
           const hasAttachment = messages.some((message) => Boolean(message.attachment_url));
 
@@ -44,8 +61,8 @@ export default async function AdminQuestionsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">
-                    {question.profiles?.[0]?.full_name || "Öğrenci"}
-                    {question.profiles?.[0]?.email ? ` · ${question.profiles[0].email}` : ""}
+                    {studentProfile?.full_name || "Öğrenci"}
+                    {studentProfile?.email ? ` · ${studentProfile.email}` : ""}
                     {" · "}
                     {new Date(question.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
