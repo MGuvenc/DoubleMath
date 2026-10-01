@@ -88,6 +88,20 @@ export interface LessonWithStudentRow extends LessonRow {
   profiles: { full_name: string; email: string } | null;
 }
 
+export interface TopicProgressRow {
+  id: string;
+  student_id: string;
+  lesson_id: string | null;
+  topic: string;
+  mastery_level: number;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface TopicProgressWithStudentRow extends TopicProgressRow {
+  profiles: { full_name: string; email: string } | null;
+}
+
 export interface AssignmentRow {
   id: string;
   title: string;
