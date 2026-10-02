@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiveKitRoom, GridLayout, ParticipantTile, RoomAudioRenderer, useTracks } from "@livekit/components-react";
+import {
+  LiveKitRoom,
+  GridLayout,
+  ParticipantTile,
+  RoomAudioRenderer,
+  useLocalParticipant,
+  useRoomContext,
+  useRemoteParticipants,
+  useTracks,
+} from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
 import { Loader2, MonitorUp, Video } from "lucide-react";
@@ -23,9 +32,76 @@ function SessionLayout() {
   );
 }
 
+function LiveSessionRoomControls({ isHost }: { isHost: boolean }) {
+  const { localParticipant, isMicrophoneEnabled, isCameraEnabled } = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
+  const room = useRoomContext();
+
+  const handleToggleMicrophone = async () => {
+    await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled);
+  };
+
+  const handleToggleCamera = async () => {
+    await localParticipant.setCameraEnabled(!isCameraEnabled);
+  };
+
+  const handleMuteStudents = () => {
+    for (const participant of remoteParticipants) {
+      participant.getTrackPublication(Track.Source.Microphone)?.setEnabled(false);
+    }
+  };
+
+  const handleStopBroadcast = async () => {
+    await localParticipant.setMicrophoneEnabled(false);
+    await localParticipant.setCameraEnabled(false);
+    room.disconnect();
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={handleToggleMicrophone}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+      >
+        {isMicrophoneEnabled ? "Mikrofonu kapat" : "Mikrofonu aç"}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleToggleCamera}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+      >
+        {isCameraEnabled ? "Kamerayı kapat" : "Kamerayı aç"}
+      </button>
+
+      {isHost && (
+        <>
+          <button
+            type="button"
+            onClick={handleMuteStudents}
+            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 hover:bg-amber-100"
+          >
+            Öğrenciyi sustur
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStopBroadcast}
+            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
+          >
+            Yayını durdur
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function LiveSessionJoin({ sessionId }: { sessionId: string }) {
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
+  const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +125,7 @@ export function LiveSessionJoin({ sessionId }: { sessionId: string }) {
         if (!active) return;
         setToken(payload.token);
         setServerUrl(payload.serverUrl);
+        setIsHost(Boolean(payload.isHost));
         setError(null);
       } catch (err) {
         if (!active) return;
@@ -90,19 +167,20 @@ export function LiveSessionJoin({ sessionId }: { sessionId: string }) {
       </div>
 
       <LiveKitRoom
-        video={true}
-        audio={true}
+        video={false}
+        audio={false}
         token={token}
         serverUrl={serverUrl}
         connect={true}
         options={{ adaptiveStream: true, dynacast: true }}
       >
+        <LiveSessionRoomControls isHost={isHost} />
         <SessionLayout />
       </LiveKitRoom>
 
       <div className="flex items-center gap-2 text-xs text-slate-500">
         <MonitorUp className="h-3.5 w-3.5" />
-        Mikrofon ve kamera erişimini açmanız gerekebilir.
+        Mikrofon ve kamera erişimini açmak için butonları kullanın. Varsayılan olarak kapalı başlar.
       </div>
 
       <LiveSessionChat sessionId={sessionId} />

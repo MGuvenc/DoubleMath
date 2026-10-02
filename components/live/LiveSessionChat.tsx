@@ -20,6 +20,9 @@ export function LiveSessionChat({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     let active = true;
+    const intervalId = setInterval(() => {
+      void loadComments();
+    }, 3000);
 
     async function loadComments() {
       try {
@@ -34,9 +37,11 @@ export function LiveSessionChat({ sessionId }: { sessionId: string }) {
       }
     }
 
-    loadComments();
+    void loadComments();
+
     return () => {
       active = false;
+      clearInterval(intervalId);
     };
   }, [sessionId]);
 
