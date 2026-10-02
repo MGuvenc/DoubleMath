@@ -28,9 +28,10 @@ export async function POST(request: Request) {
       full_name: string;
       is_active: boolean;
     }>(),
-    supabase.from("live_sessions").select("room_name, status").eq("id", sessionId).maybeSingle<{
+    supabase.from("live_sessions").select("room_name, status, target_mode").eq("id", sessionId).maybeSingle<{
       room_name: string;
       status: string;
+      target_mode: "all" | "specific";
     }>(),
   ]);
 
@@ -43,11 +44,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Bu canlı ders şu anda katılıma açık değil." }, { status: 403 });
   }
 
+  if (!isHost && session.target_mode === "specific") {
+    const { data: targetMatch } = await supabase
+      .from("live_session_targets")
+      .select("session_id")
+      .eq("session_id", sessionId)
+      .eq("student_id", user.id)
+      .maybeSingle();
+
+    if (!targetMatch) {
+      return NextResponse.json({ error: "Bu canlı derse katılma izniniz yok." }, { status: 403 });
+    }
+  }
+
   const serverUrl = process.env.LIVEKIT_URL;
   const apiKey = process.env.LIVEKIT_API_KEY;
   const apiSecret = process.env.LIVEKIT_API_SECRET;
   if (!serverUrl || !apiKey || !apiSecret) {
-    return NextResponse.json({ error: "Canlı yayın servisi henüz yapılandırılmamış." }, { status: 503 });
+    return NextResponse.json(
+      {
+        error:
+          "Canlı yayın servisi yapılandırılmamış. .env.local içinde LIVEKIT_URL, LIVEKIT_API_KEY ve LIVEKIT_API_SECRET değerlerini tanımlayın.",
+      },
+      { status: 503 }
+    );
   }
 
   const accessToken = new AccessToken(apiKey, apiSecret, {

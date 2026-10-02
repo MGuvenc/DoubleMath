@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
   Bell,
   Package,
+  Video,
   LogOut,
   Menu,
   X,
@@ -28,6 +29,7 @@ const LINKS = [
   { href: "/student/quizzes", label: "Sınavlar", icon: ClipboardCheck },
   { href: "/student/questions", label: "Öğretmene Sor", icon: MessageCircle },
   { href: "/student/packages", label: "Paketlerim", icon: Package },
+  { href: "/student/live", label: "Canlı Dersler", icon: Video },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
 ];
 
