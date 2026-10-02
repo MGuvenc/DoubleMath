@@ -50,7 +50,7 @@ export default async function StudentLiveSessionPage({ params }: { params: { ses
             <Video className="h-4 w-4" />
             Canlı ders odası
           </div>
-          <LiveSessionJoin sessionId={session.id} roomName={session.room_name} />
+          <LiveSessionJoin sessionId={session.id} />
         </div>
       ) : (
         <div className="card mt-6 text-sm text-slate-500">Bu canlı ders henüz başlatılmadı. Öğretmen tarafından başlatılınca burada otomatik olarak açılır.</div>

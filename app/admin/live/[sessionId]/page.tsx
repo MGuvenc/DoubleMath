@@ -39,7 +39,7 @@ export default async function AdminLiveSessionPage({ params }: { params: { sessi
             <Video className="h-4 w-4" />
             Canlı oda
           </div>
-          <LiveSessionJoin sessionId={session.id} roomName={session.room_name} />
+          <LiveSessionJoin sessionId={session.id} />
         </div>
       ) : (
         <div className="card mt-6 text-sm text-slate-500">Bu canlı ders henüz başlatılmadı. Öğretmen olarak önce “Başlat” butonuna basın.</div>

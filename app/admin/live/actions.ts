@@ -11,9 +11,9 @@ function toTurkeyIso(value: string) {
   return new Date(`${value}:00+03:00`).toISOString();
 }
 
-export async function createLiveSession(formData: FormData): Promise<LiveSessionActionResult> {
+export async function createLiveSession(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) return { error: admin.error };
+  if (!admin.ok) throw new Error(admin.error);
 
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim() || null;
@@ -23,17 +23,17 @@ export async function createLiveSession(formData: FormData): Promise<LiveSession
   const studentIds = formData.getAll("student_ids").map(String).filter(Boolean);
 
   if (!title || title.length > 120 || !startsAtInput) {
-    return { error: "Başlık (en fazla 120 karakter) ve tarih/saat zorunludur." };
+    throw new Error("Başlık (en fazla 120 karakter) ve tarih/saat zorunludur.");
   }
   if (!Number.isInteger(durationMinutes) || durationMinutes < 15 || durationMinutes > 240) {
-    return { error: "Ders süresi 15 ile 240 dakika arasında olmalıdır." };
+    throw new Error("Ders süresi 15 ile 240 dakika arasında olmalıdır.");
   }
-  if (!['all', 'specific'].includes(targetMode)) {
-    return { error: "Canlı ders hedefi geçersiz." };
+  if (!["all", "specific"].includes(targetMode)) {
+    throw new Error("Canlı ders hedefi geçersiz.");
   }
 
   const startsAt = toTurkeyIso(startsAtInput);
-  if (Number.isNaN(Date.parse(startsAt))) return { error: "Geçerli bir tarih ve saat gir." };
+  if (Number.isNaN(Date.parse(startsAt))) throw new Error("Geçerli bir tarih ve saat gir.");
 
   const supabase = createClient();
   const { data: session, error } = await supabase
@@ -52,13 +52,13 @@ export async function createLiveSession(formData: FormData): Promise<LiveSession
 
   if (error || !session) {
     console.error("Canlı ders oluşturulamadı:", error);
-    return { error: "Canlı ders planlanamadı." };
+    throw new Error("Canlı ders planlanamadı.");
   }
 
   if (targetMode === "specific") {
     const uniqueStudentIds = [...new Set(studentIds)];
     if (uniqueStudentIds.length === 0) {
-      return { error: "Özel canlı derste en az bir öğrenci seçmelisiniz." };
+      throw new Error("Özel canlı derste en az bir öğrenci seçmelisiniz.");
     }
 
     const { error: targetsError } = await supabase.from("live_session_targets").insert(
@@ -70,69 +70,74 @@ export async function createLiveSession(formData: FormData): Promise<LiveSession
 
     if (targetsError) {
       console.error("Canlı ders hedefleri eklenemedi:", targetsError);
-      return { error: "Canlı ders oluşturuldu ama öğrenci hedefleri eklenemedi." };
+      throw new Error("Canlı ders oluşturuldu ama öğrenci hedefleri eklenemedi.");
     }
   }
 
   revalidatePath("/admin/live");
   revalidatePath("/student/live");
-  return { success: true };
 }
 
-export async function startLiveSession(sessionId: string): Promise<LiveSessionActionResult> {
+export async function startLiveSession(sessionId: string): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) return { error: admin.error };
+  if (!admin.ok) throw new Error(admin.error);
 
   const supabase = createClient();
-  const { error } = await supabase
+  const result = await supabase
     .from("live_sessions")
     .update({ status: "live", started_at: new Date().toISOString(), ended_at: null })
     .eq("id", sessionId)
-    .eq("status", "scheduled");
+    .eq("status", "scheduled")
+    .then((response) => ({ success: true as const, error: response.error?.message || null }));
 
-  if (error) return { error: "Canlı ders başlatılamadı." };
+  if (result.error) {
+    throw new Error("Canlı ders başlatılamadı.");
+  }
 
   revalidatePath("/admin/live");
   revalidatePath("/student/live");
   revalidatePath(`/admin/live/${sessionId}`);
   revalidatePath(`/student/live/${sessionId}`);
-  return { success: true };
 }
 
-export async function endLiveSession(sessionId: string): Promise<LiveSessionActionResult> {
+export async function endLiveSession(sessionId: string): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) return { error: admin.error };
+  if (!admin.ok) throw new Error(admin.error);
 
   const supabase = createClient();
-  const { error } = await supabase
+  const result = await supabase
     .from("live_sessions")
     .update({ status: "ended", ended_at: new Date().toISOString() })
     .eq("id", sessionId)
-    .eq("status", "live");
+    .eq("status", "live")
+    .then((response) => ({ success: true as const, error: response.error?.message || null }));
 
-  if (error) return { error: "Canlı ders bitirilemedi." };
+  if (result.error) {
+    throw new Error("Canlı ders bitirilemedi.");
+  }
 
   revalidatePath("/admin/live");
   revalidatePath("/student/live");
   revalidatePath(`/admin/live/${sessionId}`);
   revalidatePath(`/student/live/${sessionId}`);
-  return { success: true };
 }
 
-export async function cancelLiveSession(sessionId: string): Promise<LiveSessionActionResult> {
+export async function cancelLiveSession(sessionId: string): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) return { error: admin.error };
+  if (!admin.ok) throw new Error(admin.error);
 
   const supabase = createClient();
-  const { error } = await supabase
+  const result = await supabase
     .from("live_sessions")
     .update({ status: "cancelled" })
     .eq("id", sessionId)
-    .eq("status", "scheduled");
+    .eq("status", "scheduled")
+    .then((response) => ({ success: true as const, error: response.error?.message || null }));
 
-  if (error) return { error: "Canlı ders iptal edilemedi." };
+  if (result.error) {
+    throw new Error("Canlı ders iptal edilemedi.");
+  }
 
   revalidatePath("/admin/live");
   revalidatePath("/student/live");
-  return { success: true };
 }

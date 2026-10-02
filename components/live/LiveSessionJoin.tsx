@@ -23,7 +23,7 @@ function SessionLayout() {
   );
 }
 
-export function LiveSessionJoin({ sessionId, roomName }: { sessionId: string; roomName: string }) {
+export function LiveSessionJoin({ sessionId }: { sessionId: string }) {
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +94,6 @@ export function LiveSessionJoin({ sessionId, roomName }: { sessionId: string; ro
         audio={true}
         token={token}
         serverUrl={serverUrl}
-        roomName={roomName}
         connect={true}
         options={{ adaptiveStream: true, dynacast: true }}
       >

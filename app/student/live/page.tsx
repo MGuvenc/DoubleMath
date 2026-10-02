@@ -61,7 +61,7 @@ export default async function StudentLivePage() {
                     <Clock3 className="h-4 w-4" />
                     Canlı ders başlatılmış
                   </div>
-                  <LiveSessionJoin sessionId={session.id} roomName={session.room_name} />
+                  <LiveSessionJoin sessionId={session.id} />
                 </div>
               </div>
             )}
