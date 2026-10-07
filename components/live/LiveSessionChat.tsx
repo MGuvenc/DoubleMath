@@ -73,13 +73,13 @@ export function LiveSessionChat({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="mb-3 flex shrink-0 items-center gap-2 text-sm font-semibold text-slate-800">
         <MessageSquare className="h-4 w-4 text-brand-600" />
         Canlı sohbet
       </div>
 
-      <div className="space-y-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
         {loading ? (
           <div className="text-sm text-slate-400">Yorumlar yükleniyor...</div>
         ) : comments.length === 0 ? (
@@ -97,9 +97,9 @@ export function LiveSessionChat({ sessionId }: { sessionId: string }) {
         )}
       </div>
 
-      {error && <p className="mt-3 text-xs text-rose-600">{error}</p>}
+      {error && <p className="mt-3 shrink-0 text-xs text-rose-600">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+      <form onSubmit={handleSubmit} className="mt-4 flex shrink-0 gap-2">
         <input
           value={message}
           onChange={(event) => setMessage(event.target.value)}
