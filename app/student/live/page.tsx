@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Video, Clock3, ArrowRight } from "lucide-react";
-import { LiveSessionJoin } from "@/components/live/LiveSessionJoin";
 
 export default async function StudentLivePage() {
   const supabase = createClient();
@@ -61,7 +60,7 @@ export default async function StudentLivePage() {
                     <Clock3 className="h-4 w-4" />
                     Canlı ders başlatılmış
                   </div>
-                  <LiveSessionJoin sessionId={session.id} />
+                  <p className="mt-1">Katılmak için canlı ders bağlantısını açın.</p>
                 </div>
               </div>
             )}

@@ -1,4 +1,4 @@
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, TrackSource } from "livekit-server-sdk";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -78,7 +78,9 @@ export async function POST(request: Request) {
   accessToken.addGrant({
     roomJoin: true,
     room: session.room_name,
-    canPublish: isHost,
+    ...(isHost
+      ? { canPublish: true }
+      : { canPublishSources: [TrackSource.MICROPHONE, TrackSource.CAMERA] }),
     canSubscribe: true,
     canPublishData: true,
   });
