@@ -33,7 +33,15 @@ const LINKS = [
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
 ];
 
-export default function StudentSidebar({ studentName, unreadCounts }: { studentName: string; unreadCounts: Record<string, number> }) {
+export default function StudentSidebar({
+  studentName,
+  unreadCounts,
+  hasPackageAccess,
+}: {
+  studentName: string;
+  unreadCounts: Record<string, number>;
+  hasPackageAccess: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -89,7 +97,10 @@ export default function StudentSidebar({ studentName, unreadCounts }: { studentN
 
   const navLinks = (onNavigate?: () => void) => (
     <>
-      {LINKS.map((l) => {
+      {LINKS.filter((link) =>
+        hasPackageAccess ||
+        ["/student/dashboard", "/student/packages", "/student/questions"].includes(link.href)
+      ).map((l) => {
         const active = pathname === l.href;
         const unreadCount = unreadCounts[l.href] || 0;
         return (

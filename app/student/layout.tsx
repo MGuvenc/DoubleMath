@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import StudentSidebar from "@/components/student/StudentSidebar";
 import type { ProfileFullRow } from "@/lib/supabase/query-types";
+import { hasPackageAccess } from "@/lib/package-access";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -23,6 +24,21 @@ export default async function StudentLayout({ children }: { children: React.Reac
     .eq("recipient_id", user.id)
     .eq("is_read", false);
 
+  const { data: packageOrders, error: packageError } = await supabase
+    .from("orders")
+    .select("package_expires_at")
+    .eq("student_id", user.id)
+    .eq("status", "paid")
+    .returns<{ package_expires_at: string | null }[]>();
+
+  if (packageError) {
+    console.error("Öğrenci paket erişimi menü için kontrol edilemedi:", packageError);
+  }
+
+  const hasAccess = (packageOrders || []).some((order) =>
+    hasPackageAccess(order.package_expires_at)
+  );
+
   const unreadCounts = (unreadNotifications || []).reduce<Record<string, number>>((counts, notification) => {
     if (notification.link) {
       const href = notification.link.split("?")[0];
@@ -33,7 +49,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 sm:flex-row">
-      <StudentSidebar studentName={profile?.full_name || ""} unreadCounts={unreadCounts} />
+      <StudentSidebar
+        studentName={profile?.full_name || ""}
+        unreadCounts={unreadCounts}
+        hasPackageAccess={hasAccess}
+      />
       <main className="flex-1 p-4 pb-8 sm:p-8">{children}</main>
     </div>
   );

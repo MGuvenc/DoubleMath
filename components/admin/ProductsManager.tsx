@@ -82,16 +82,31 @@ export default function ProductsManager({ products }: { products: ProductRow[] }
             <input name="name" required defaultValue={editing?.name} className="input" />
           </div>
 
-          {!editing && (
-            <div>
-              <label className="label">Tür</label>
-              <select name="type" defaultValue="lesson_package" className="input">
-                <option value="lesson_package">Ders Paketi</option>
-                <option value="book">Kitap</option>
-                <option value="other">Diğer</option>
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="label">Tür</label>
+            <select name="type" defaultValue={editing?.type || "lesson_package"} className="input">
+              <option value="lesson_package">Ders Paketi / Rehberlik Paketi</option>
+              <option value="book">Kitap</option>
+              <option value="other">Diğer</option>
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              Fiyatlandırma sayfasında görünmesi ve satın alınabilmesi için Ders Paketi türünü seç.
+            </p>
+          </div>
+
+          <div>
+            <label className="label">Fiyatlandırma sırası</label>
+            <input
+              type="number"
+              name="sort_order"
+              min="0"
+              step="1"
+              required
+              defaultValue={editing?.sort_order ?? 0}
+              className="input"
+            />
+            <p className="mt-1 text-xs text-slate-500">Küçük sayı önce gösterilir; eşit değerlerde fiyat sıralaması uygulanır.</p>
+          </div>
 
           <div>
             <label className="label">Fiyat (TL) *</label>

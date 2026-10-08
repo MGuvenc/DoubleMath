@@ -4,6 +4,7 @@ import { Calendar, Clock, ClipboardList, ClipboardCheck, Package } from "lucide-
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import type { LessonRow, SubmissionWithAssignmentRow, QuizRow, StudentOrderRow } from "@/lib/supabase/query-types";
+import { hasPackageAccess, PACKAGE_ACCESS_GRACE_DAYS } from "@/lib/package-access";
 
 export default async function StudentDashboard() {
   const supabase = createClient();
@@ -20,8 +21,11 @@ export default async function StudentDashboard() {
     .returns<StudentOrderRow[]>();
 
   const currentPackage = (packageOrders || []).find(
-    (order) => !order.package_expires_at || new Date(order.package_expires_at).getTime() > Date.now()
+    (order) => hasPackageAccess(order.package_expires_at)
   );
+  const packageIsActive = currentPackage?.package_expires_at
+    ? new Date(currentPackage.package_expires_at).getTime() > Date.now()
+    : Boolean(currentPackage);
 
   const { data: upcomingLessons } = await supabase
     .from("lessons")
@@ -67,13 +71,17 @@ export default async function StudentDashboard() {
         <div className="flex items-center gap-3">
           <Package className="h-6 w-6 text-brand-600" />
           <div>
-            <p className="text-xs text-slate-500">Aktif paketin</p>
+            <p className="text-xs text-slate-500">
+              {packageIsActive ? "Aktif paketin" : "Paket sonrası ek erişim süren"}
+            </p>
             <p className="font-semibold text-slate-900">
               {currentPackage?.product_name || "Aktif paket yok"}
             </p>
             {currentPackage?.package_expires_at && (
               <p className="text-sm text-slate-600">
-                {new Date(currentPackage.package_expires_at).toLocaleDateString("tr-TR")} tarihinde sona eriyor
+                {packageIsActive
+                  ? `${new Date(currentPackage.package_expires_at).toLocaleDateString("tr-TR")} tarihinde sona eriyor`
+                  : `${new Date(new Date(currentPackage.package_expires_at).getTime() + PACKAGE_ACCESS_GRACE_DAYS * 24 * 60 * 60 * 1000).toLocaleDateString("tr-TR")} tarihinde erişim sona eriyor`}
               </p>
             )}
           </div>

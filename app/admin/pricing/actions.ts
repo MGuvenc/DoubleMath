@@ -5,6 +5,11 @@ import { revalidatePath } from "next/cache";
 
 export type ProductActionResult = { error: string } | { success: true };
 
+function readSortOrder(formData: FormData): number | null {
+  const value = Number(formData.get("sort_order"));
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
 export async function createProduct(formData: FormData): Promise<ProductActionResult> {
   const supabase = createClient();
 
@@ -18,10 +23,15 @@ export async function createProduct(formData: FormData): Promise<ProductActionRe
   const pricingUnit = formData.get("pricing_unit") as "hourly" | "monthly" | "one_time";
   const features = (formData.get("features") as string) || null;
   const type = formData.get("type") as "lesson_package" | "book" | "other";
+  const sortOrder = readSortOrder(formData);
 
   if (!name || !price || price <= 0) {
     return { error: "Paket adı ve geçerli bir fiyat girmelisin." };
   }
+  if (!["lesson_package", "book", "other"].includes(type)) {
+    return { error: "Ürün türü geçersiz." };
+  }
+  if (sortOrder === null) return { error: "Sıralama 0 veya daha büyük bir tam sayı olmalı." };
 
   const { error } = await supabase.from("products").insert({
     type,
@@ -32,6 +42,7 @@ export async function createProduct(formData: FormData): Promise<ProductActionRe
     duration_months: durationMonths,
     pricing_unit: pricingUnit,
     features,
+    sort_order: sortOrder,
     is_active: true,
   });
 
@@ -57,14 +68,21 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   const durationMonths = durationMonthsRaw ? Number(durationMonthsRaw) : null;
   const pricingUnit = formData.get("pricing_unit") as "hourly" | "monthly" | "one_time";
   const features = (formData.get("features") as string) || null;
+  const type = formData.get("type") as "lesson_package" | "book" | "other";
+  const sortOrder = readSortOrder(formData);
 
   if (!name || !price || price <= 0) {
     return { error: "Paket adı ve geçerli bir fiyat girmelisin." };
   }
+  if (!["lesson_package", "book", "other"].includes(type)) {
+    return { error: "Ürün türü geçersiz." };
+  }
+  if (sortOrder === null) return { error: "Sıralama 0 veya daha büyük bir tam sayı olmalı." };
 
   const { error } = await supabase
     .from("products")
     .update({
+      type,
       name,
       description,
       price,
@@ -72,6 +90,7 @@ export async function updateProduct(productId: string, formData: FormData): Prom
       duration_months: durationMonths,
       pricing_unit: pricingUnit,
       features,
+      sort_order: sortOrder,
     })
     .eq("id", productId);
 

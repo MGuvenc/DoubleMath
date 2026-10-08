@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { ProfileRoleRow } from "@/lib/supabase/query-types";
+import { PACKAGE_ACCESS_GRACE_DAYS } from "@/lib/package-access";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -70,6 +71,37 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin/dashboard";
       return NextResponse.redirect(url);
+    }
+
+    const isPackageExemptRoute =
+      path === "/student/dashboard" ||
+      path === "/student/packages" ||
+      path === "/student/questions" ||
+      path.startsWith("/student/questions/");
+
+    if (isStudentRoute && profile?.role === "student" && !isPackageExemptRoute) {
+      const graceCutoff = new Date(
+        Date.now() - PACKAGE_ACCESS_GRACE_DAYS * 24 * 60 * 60 * 1000
+      ).toISOString();
+      const { data: packageAccess, error } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("student_id", user.id)
+        .eq("status", "paid")
+        .or(`package_expires_at.is.null,package_expires_at.gt.${graceCutoff}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Öğrenci paket erişimi kontrol edilemedi:", error);
+      }
+
+      if (!packageAccess) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/student/packages";
+        url.searchParams.set("access", "required");
+        return NextResponse.redirect(url);
+      }
     }
   }
 

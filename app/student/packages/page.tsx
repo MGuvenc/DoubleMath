@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StudentOrderRow } from "@/lib/supabase/query-types";
+import { hasPackageAccess, PACKAGE_ACCESS_GRACE_DAYS } from "@/lib/package-access";
 
 const STATUS_LABELS: Record<StudentOrderRow["status"], string> = {
   pending: "Ödeme onayı bekliyor",
@@ -12,7 +13,7 @@ const STATUS_LABELS: Record<StudentOrderRow["status"], string> = {
 export default async function StudentPackagesPage({
   searchParams,
 }: {
-  searchParams: { orderSubmitted?: string };
+  searchParams: { orderSubmitted?: string; access?: string };
 }) {
   const supabase = createClient();
   const {
@@ -28,8 +29,11 @@ export default async function StudentPackagesPage({
 
   const now = Date.now();
   const activeOrder = (orders || []).find(
-    (order) => order.status === "paid" && (!order.package_expires_at || new Date(order.package_expires_at).getTime() > now)
+    (order) => order.status === "paid" && hasPackageAccess(order.package_expires_at, now)
   );
+  const packageIsActive = activeOrder?.package_expires_at
+    ? new Date(activeOrder.package_expires_at).getTime() > now
+    : Boolean(activeOrder);
   const pendingOrder = !activeOrder ? (orders || []).find((order) => order.status === "pending") : null;
 
   return (
@@ -43,17 +47,27 @@ export default async function StudentPackagesPage({
         </p>
       )}
 
+      {searchParams.access === "required" && (
+        <p role="alert" className="mt-5 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          Diğer ekranları görüntülemek için bir ders paketi satın alman gerekiyor. Paket süresi bittikten sonra 3 gün boyunca erişimin devam eder.
+        </p>
+      )}
+
       <section className="card mt-6">
         <h2 className="font-semibold text-slate-900">Şu anki durum</h2>
         {activeOrder ? (
           <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-lg font-bold text-slate-900">{activeOrder.product_name || "Ders paketi"}</p>
-              <p className="mt-1 text-sm text-green-700">Aktif paket</p>
+              <p className={`mt-1 text-sm ${packageIsActive ? "text-green-700" : "text-amber-700"}`}>
+                {packageIsActive ? "Aktif paket" : "3 günlük ek erişim süresi"}
+              </p>
             </div>
             <p className="text-sm text-slate-600">
               {activeOrder.package_expires_at
-                ? `Bitiş tarihi: ${new Date(activeOrder.package_expires_at).toLocaleDateString("tr-TR")}`
+                ? packageIsActive
+                  ? `Bitiş tarihi: ${new Date(activeOrder.package_expires_at).toLocaleDateString("tr-TR")}`
+                  : `Ek erişim ${new Date(new Date(activeOrder.package_expires_at).getTime() + PACKAGE_ACCESS_GRACE_DAYS * 24 * 60 * 60 * 1000).toLocaleDateString("tr-TR")} tarihinde sona eriyor`
                 : "Süre sınırı yok"}
             </p>
           </div>

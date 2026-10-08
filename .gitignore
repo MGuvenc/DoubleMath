@@ -8,6 +8,8 @@ node_modules
 .DS_Store
 supabase/migrations
 !supabase/migrations/
+!supabase/migrations/*
 supabase/migrations/*
 !supabase/migrations/0006_blog_views.sql
 !supabase/migrations/0007_blog_covers.sql
+!supabase/migrations/0011_package_expiration_warning.sql
