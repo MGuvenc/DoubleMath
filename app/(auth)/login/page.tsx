@@ -27,6 +27,9 @@ function LoginForm() {
         ? "Google ile giriş başarısız oldu. Supabase Google sağlayıcı ayarlarını kontrol et."
         : null
   );
+  const notice = searchParams.get("password-updated") === "1"
+    ? "Şifren güncellendi. Yeni şifrenle giriş yapabilirsin."
+    : "";
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -97,7 +100,12 @@ function LoginForm() {
             />
           </div>
           <div>
-            <label className="label">Şifre</label>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="label mb-0">Şifre</label>
+              <Link href="/forgot-password" className="text-sm font-medium text-brand-700 hover:underline">
+                Şifremi unuttum
+              </Link>
+            </div>
             <input
               type="password"
               required
@@ -107,6 +115,7 @@ function LoginForm() {
             />
           </div>
 
+          {notice && <p role="status" className="text-sm text-green-700">{notice}</p>}
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <MathSubmitButton type="submit" loading={loading} pendingText="Giriş yapılıyor..." className="btn-primary w-full">

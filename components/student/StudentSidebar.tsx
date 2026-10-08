@@ -15,6 +15,7 @@ import {
   Bell,
   Package,
   Video,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -31,6 +32,7 @@ const LINKS = [
   { href: "/student/packages", label: "Paketlerim", icon: Package },
   { href: "/student/live", label: "Canlı Dersler", icon: Video },
   { href: "/student/announcements", label: "Duyurular", icon: Bell },
+  { href: "/student/settings", label: "Ayarlar", icon: Settings },
 ];
 
 export default function StudentSidebar({
@@ -99,7 +101,7 @@ export default function StudentSidebar({
     <>
       {LINKS.filter((link) =>
         hasPackageAccess ||
-        ["/student/dashboard", "/student/packages", "/student/questions"].includes(link.href)
+        ["/student/dashboard", "/student/packages", "/student/questions", "/student/settings"].includes(link.href)
       ).map((l) => {
         const active = pathname === l.href;
         const unreadCount = unreadCounts[l.href] || 0;

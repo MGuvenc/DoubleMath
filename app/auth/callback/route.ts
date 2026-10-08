@@ -10,12 +10,22 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const redirectTo = searchParams.get("redirect");
+  const isPasswordRecovery =
+    searchParams.get("flow") === "recovery" && searchParams.get("next") === "/reset-password";
 
   if (code) {
     const supabase = createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
+    if (error && isPasswordRecovery) {
+      return NextResponse.redirect(new URL("/reset-password?error=expired", origin));
+    }
+
     if (!error && data.user) {
+      if (isPasswordRecovery) {
+        return NextResponse.redirect(new URL("/reset-password", origin));
+      }
+
       const email = data.user.email;
       if (!email) return NextResponse.redirect(`${origin}/login?error=oauth`);
 

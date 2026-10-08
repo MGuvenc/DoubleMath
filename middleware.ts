@@ -76,6 +76,7 @@ export async function middleware(request: NextRequest) {
     const isPackageExemptRoute =
       path === "/student/dashboard" ||
       path === "/student/packages" ||
+      path === "/student/settings" ||
       path === "/student/questions" ||
       path.startsWith("/student/questions/");
 
