@@ -9,22 +9,39 @@ import type { ProfileRoleRow } from "@/lib/supabase/query-types";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const tokenHash = searchParams.get("token_hash");
+  const verificationType = searchParams.get("type");
   const redirectTo = searchParams.get("redirect");
   const isPasswordRecovery =
-    searchParams.get("flow") === "recovery" && searchParams.get("next") === "/reset-password";
+    searchParams.get("next") === "/reset-password" &&
+    (searchParams.get("flow") === "recovery" || verificationType === "recovery");
+
+  if (isPasswordRecovery && tokenHash && verificationType === "recovery") {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: "recovery",
+    });
+
+    if (error || !data.user) {
+      console.error("Şifre yenileme bağlantısı doğrulanamadı:", error);
+      return NextResponse.redirect(new URL("/reset-password?error=expired", origin));
+    }
+
+    return NextResponse.redirect(new URL("/reset-password", origin));
+  }
 
   if (code) {
     const supabase = createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error && isPasswordRecovery) {
+      console.error("Şifre yenileme bağlantısı doğrulanamadı:", error);
       return NextResponse.redirect(new URL("/reset-password?error=expired", origin));
     }
 
     if (!error && data.user) {
-      if (isPasswordRecovery) {
-        return NextResponse.redirect(new URL("/reset-password", origin));
-      }
+      if (isPasswordRecovery) return NextResponse.redirect(new URL("/reset-password", origin));
 
       const email = data.user.email;
       if (!email) return NextResponse.redirect(`${origin}/login?error=oauth`);
@@ -62,6 +79,10 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(new URL(target, origin));
     }
+  }
+
+  if (isPasswordRecovery) {
+    return NextResponse.redirect(new URL("/reset-password?error=expired", origin));
   }
 
   // Hata durumunda giriş sayfasına, açıklamayla geri dön
