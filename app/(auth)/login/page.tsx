@@ -100,12 +100,7 @@ function LoginForm() {
             />
           </div>
           <div>
-            <div className="mb-1 flex items-center justify-between">
-              <label className="label mb-0">Şifre</label>
-              <Link href="/forgot-password" className="text-sm font-medium text-brand-700 hover:underline">
-                Şifremi unuttum
-              </Link>
-            </div>
+            <label className="label">Şifre</label>
             <input
               type="password"
               required
@@ -127,6 +122,11 @@ function LoginForm() {
           Hesabın yok mu?{" "}
           <Link href="/register" className="font-medium text-brand-600 hover:underline">
             Kayıt ol
+          </Link>
+        </p>
+        <p className="mt-3 text-center">
+          <Link href="/forgot-password" className="text-sm font-medium text-brand-700 hover:underline">
+            Şifremi unuttum
           </Link>
         </p>
       </div>
