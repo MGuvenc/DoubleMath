@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import RouteTransitionFeedback from "@/components/ui/RouteTransitionFeedback";
-// @ts-expect-error Next.js resolves global CSS imports at build time.
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
