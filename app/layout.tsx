@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  verification: {
+    google: "t4cGAdyTUSLD-wDEXEhd9FKRlUwSH70e7b79fcgZULc",
+  },
   keywords: [
     "matematik özel ders",
     "online matematik dersi",
